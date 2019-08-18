@@ -8,6 +8,7 @@ This has landing pages and functions to run the entire authentication flow:
 - register
 - forgot password
 - change password
+- profile edits
   
 This uses `flask-login` on the backend, using some code from the very useful [dash-flask-login](https://github.com/RafaelMiquelino/dash-flask-login). Data is held in `users.db`. 
 
