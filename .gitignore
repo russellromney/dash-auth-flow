@@ -7,7 +7,7 @@ updateReqs
 .vscode
 env
 venv
-users.db
+*users.db*
 testbench
 bkpMySQL
 run_gunicorn
