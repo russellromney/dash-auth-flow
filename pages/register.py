@@ -50,11 +50,11 @@ layout = dbc.Row(
                     dbc.FormText('Email',id='register-email-formtext',color='secondary'),
                     html.Br(),
                     
-                    dbc.Input(id='register-password'),
+                    dbc.Input(id='register-password',type='password'),
                     dbc.FormText('Password'),
                     html.Br(),
                     
-                    dbc.Input(id='register-confirm'),
+                    dbc.Input(id='register-confirm',type='password'),
                     dbc.FormText('Confirm password'),
                     html.Br(),
                     
