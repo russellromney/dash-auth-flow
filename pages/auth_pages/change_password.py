@@ -14,7 +14,8 @@ from utilities.auth import (
     user_exists,
     change_user,
     user_table,
-    change_password
+    change_password,
+    layout_auth
 )
 
 import time
@@ -22,49 +23,64 @@ import time
 success_alert = dbc.Alert(
     'Reset successful. Taking you to login!',
     color='success',
-    dismissable=False
 )
 failure_alert = dbc.Alert(
     'Reset unsuccessful. Are you sure the email and code were correct?',
     color='danger',
-    dismissable=False
+)
+already_login_alert = dbc.Alert(
+    'User already logged in. Taking you to your profile.',
+    color='warning'
 )
 
-layout = dbc.Row(
-    dbc.Col(
-        [
-            html.H3('Change Password'),
-            dcc.Location(id='change-url',refresh=True),
-            html.Div(id='change-trigger',style=dict(display='none')),
-            dbc.FormGroup(
-                [
-                    html.Div(id='change-alert'),
-                    html.Br(),
-
-                    dbc.Input(id='change-email',autoFocus=True),
-                    dbc.FormText('Email'),
-                    html.Br(),
-                    
-                    dbc.Input(id='change-key',type='password'),
-                    dbc.FormText('Code'),
-                    html.Br(),
-
-                    dbc.Input(id='change-password',type='password'),
-                    dbc.FormText('New password'),
-                    html.Br(),
-
-                    dbc.Input(id='change-confirm',type='password'),
-                    dbc.FormText('Confirm new password'),
-                    html.Br(),
-
-                    dbc.Button('Submit password change',id='change-button',color='primary'),
-
-                ]
-            )
-        ],
-        width=6
+@layout_auth('nonauth',
+    dbc.Row(
+        dbc.Col(
+            [
+                dcc.Location(id='change-url',refresh=True,pathname='/change'),
+                html.Div(already_login_alert),
+                html.Div('/app/profile',id='change-trigger',style=dict(display='none')),
+            ],
+            width=6
+        )
     )
 )
+def layout():
+    return dbc.Row(
+        dbc.Col(
+            [
+                html.H3('Change Password'),
+                dcc.Location(id='change-url',refresh=True,pathname='/change'),
+                html.Div(id='change-trigger',style=dict(display='none')),
+                dbc.FormGroup(
+                    [
+                        html.Div(id='change-alert'),
+                        html.Br(),
+
+                        dbc.Input(id='change-email',autoFocus=True),
+                        dbc.FormText('Email'),
+                        html.Br(),
+                        
+                        dbc.Input(id='change-key',type='password'),
+                        dbc.FormText('Code'),
+                        html.Br(),
+
+                        dbc.Input(id='change-password',type='password'),
+                        dbc.FormText('New password'),
+                        html.Br(),
+
+                        dbc.Input(id='change-confirm',type='password'),
+                        dbc.FormText('Confirm new password'),
+                        html.Br(),
+
+                        dbc.Button('Submit password change',id='change-button',color='primary'),
+
+                    ]
+                )
+            ],
+            width=6
+        )
+    )
 
 
 # function to validate inputs
@@ -148,5 +164,6 @@ def submit_change(submit,email,key,password,confirm):
 def change_send_to_login(url):
     if url is None or url=='':
         return no_update
+    print('sleeping and going to profile')
     time.sleep(1.5)
     return url

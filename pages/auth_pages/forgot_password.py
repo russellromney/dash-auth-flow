@@ -13,44 +13,62 @@ from server import app, User, engine
 from utilities.auth import (
     user_exists,
     send_password_key,
-    user_table
+    user_table,
+    layout_auth
 )
 
 success_alert = dbc.Alert(
     'Reset successful. Taking you to change password.',
     color='success',
-    dismissable=False
 )
 failure_alert = dbc.Alert(
     'Reset unsuccessful. Are you sure that email was correct?',
     color='danger',
-    dismissable=False
+)
+already_login_alert = dbc.Alert(
+    'User already logged in. Taking you to your profile.',
+    color='warning'
 )
 
-layout = dbc.Row(
-    dbc.Col(
-        [
-            html.H3('Forgot Password'),
-            dcc.Location(id='forgot-url',refresh=True),
-            dbc.FormGroup(
-                [
-                    html.Div(id='forgot-alert'),
-                    html.Div(id='forgot-trigger',style=dict(display='none')),
-                    html.Br(),
+@layout_auth('nonauth',
+    dbc.Row(
+        dbc.Col(
+            [
+                dcc.Location(id='forgot-url',refresh=True,pathname='/forgot'),
+                html.Div(already_login_alert),
+                html.Div('/app/profile',id='forgot-trigger',style=dict(display='none')),
 
-                    dbc.Input(id='forgot-email',autoFocus=True),
-                    dbc.FormText('Email'),
-                    html.Br(),
 
-                    dbc.Button('Submit email to receive code',id='forgot-button',color='primary'),
+            ],
+            width=6
+        )
+    )
+)
+def layout():
+    return dbc.Row(
+        dbc.Col(
+            [
+                html.H3('Forgot Password'),
+                dcc.Location(id='forgot-url',refresh=True,pathname='/forgot'),
+                dbc.FormGroup(
+                    [
+                        html.Div(id='forgot-alert'),
+                        html.Div(id='forgot-trigger',style=dict(display='none')),
+                        html.Br(),
 
-                ]
-            )
-        ],
-        width=6
+                        dbc.Input(id='forgot-email',autoFocus=True),
+                        dbc.FormText('Email'),
+                        html.Br(),
+
+                        dbc.Button('Submit email to receive code',id='forgot-button',color='primary'),
+
+                    ]
+                )
+            ],
+            width=6
+        )
     )
 
-)
 
 
 @app.callback(
@@ -84,10 +102,11 @@ def forgot_submit(submit,email):
 
 
 @app.callback(
-    Output('url','pathname'),
+    Output('forgot-url','pathname'),
     [Input('forgot-trigger','children')]
 )
 def forgot_send_to_change(url):
+    print(url)
     if url is None or url=='':
         return no_update
     print('FORGOT - CHANGING URL')

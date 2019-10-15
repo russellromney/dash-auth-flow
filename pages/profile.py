@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash
 import time
 
 from server import app, User, engine
-from utilities.auth import change_user, change_password
+from utilities.auth import change_user, change_password, layout_auth
 
 
 success_alert = dbc.Alert(
@@ -26,55 +26,76 @@ login_alert = dbc.Alert(
 )
 
 
+@layout_auth('auth',
+    dbc.Row(
+        dbc.Col(
+            [
+                dcc.Location(id='profile-url', refresh=True),
+                html.Div(login_alert),
+                html.Div('/login',id='profile-login-trigger',style=dict(display='none')),
+            ],
+            width=6
+        )
+    )
+)
+def layout():
+    return dbc.Row(
+        dbc.Col(
+            [
+                dcc.Location(id='profile-url', refresh=True,pathname='/app/profile'),
+                html.Div(1,id='profile-trigger',style=dict(display='none')),
+                
+                html.H3('Profile',id='profile-title'),
+                html.Div(id='profile-alert'),
+                html.Div(id='profile-alert-login'),
+                html.Div(id='profile-login-trigger',style=dict(display='none')),
+                html.Br(),
 
-layout = dbc.Row(
-    dbc.Col(
-        [
-            dcc.Location(id='profile-url', refresh=True),
-            html.Div(1,id='profile-trigger',style=dict(display='none')),
-            
-            html.H3('Profile',id='profile-title'),
-            html.Div(id='profile-alert'),
-            html.Div(id='profile-alert-login'),
-            html.Div(id='profile-login-trigger',style=dict(display='none')),
-            html.Br(),
+                dbc.FormGroup(
+                    [
+                        # First, first input, and formtext
+                        dbc.Label('First:',id='profile-first'),
+                        dbc.Input(placeholder='Change first name...',id='profile-first-input'),
+                        dbc.FormText(id='profile-first-formtext',color='secondary'),
+                        html.Br(),
 
-            dbc.FormGroup(
-                [
-                    # First, first input, and formtext
-                    dbc.Label('First:',id='profile-first'),
-                    dbc.Input(placeholder='Change first name...',id='profile-first-input'),
-                    dbc.FormText(id='profile-first-formtext',color='secondary'),
-                    html.Br(),
+                        # last, last input, and formtext
+                        dbc.Label('Last:',id='profile-last'),
+                        dbc.Input(placeholder='Change last name...',id='profile-last-input'),
+                        dbc.FormText(id='profile-last-formtext',color='secondary'),
+                        html.Br(),
 
-                    # last, last input, and formtext
-                    dbc.Label('Last:',id='profile-last'),
-                    dbc.Input(placeholder='Change last name...',id='profile-last-input'),
-                    dbc.FormText(id='profile-last-formtext',color='secondary'),
-                    html.Br(),
+                        # email, formtext
+                        dbc.Label('Email:',id='profile-email'),
+                        dbc.FormText('Cannot change email',color='secondary'),
+                        html.Br(),
 
-                    # email, formtext
-                    dbc.Label('Email:',id='profile-email'),
-                    dbc.FormText('Cannot change email',color='secondary'),
-                    html.Br(),
+                        html.Hr(),
+                        html.Br(),
 
-                    # password, input, confirm input
-                    dbc.Label('Change password',id='profile-password'),
-                    dbc.Input(placeholder='Change password...',id='profile-password-input',type='password'),
-                    dbc.FormText('Change password',color='secondary',id='profile-password-input-formtext'),
-                    dbc.Input(placeholder='Confirm password...',id='profile-password-confirm',type='password'),
-                    dbc.FormText('Confirm password',color='secondary',id='profile-password-confirm-formtext'),
-                    html.Br(),
+                        # password, input, confirm input
+                        dbc.Label('Change password',id='profile-password'),
+                        dbc.Input(placeholder='Change password...',id='profile-password-input',type='password'),
+                        dbc.FormText('Change password',color='secondary',id='profile-password-input-formtext'),
+                        html.Br(),
+                        dbc.Input(placeholder='Confirm password...',id='profile-password-confirm',type='password'),
+                        dbc.FormText('Confirm password',color='secondary',id='profile-password-confirm-formtext'),
+                        html.Br(),
+                        
+                        html.Hr(),
+                        html.Br(),
 
-                    dbc.Button('Save changes',color='primary',id='profile-submit',disabled=True),
-                    
-                ] # end formgroup
-            )
-        ], # end col
-        width=6
+                        dbc.Button('Save changes',color='primary',id='profile-submit',disabled=True),
+                        
+                    ] # end formgroup
+                )
+            ], # end col
+            width=6
+        )
+
     )
 
-)
+
 
 
 # function to show profile values
@@ -95,19 +116,16 @@ def profile_values(trigger):
     if not trigger:
         return no_update, no_update, 'First: ', 'Last: ', 'Email:', '', ''
     if current_user.is_authenticated:
-        return no_update, no_update, 'First: {}'.format(current_user.first), 'Last: {}'.format(current_user.last), 'Email: {}'.format(current_user.email), current_user.first, current_user.last
+        return (
+            no_update,
+            no_update,
+            ['First: ',html.Strong(current_user.first)] ,
+            ['Last: ',html.Strong(current_user.last)] ,
+            ['Email: ',html.Strong(current_user.email)] ,
+            current_user.first ,
+            current_user.last
+        )
     return login_alert, '/login', 'First: ', 'Last: ', 'Email:', '', ''
-
-
-@app.callback(
-    Output('profile-url','pathname'),
-    [Input('profile-login-trigger','children')]
-)
-def profile_send_to_login(url):
-    if url is None or url=='':
-        return no_update
-    time.sleep(1.5)
-    return url
 
 
 # function to validate changes input
@@ -197,3 +215,15 @@ def profile_save_changes(n_clicks,first,last,password):
         return success_alert,1
     
     return failure_alert,0
+
+
+
+@app.callback(
+    Output('profile-url','pathname'),
+    [Input('profile-login-trigger','children')]
+)
+def profile_send_to_login(url):
+    if url is None or url=='':
+        return no_update
+    time.sleep(1.5)
+    return url

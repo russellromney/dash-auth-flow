@@ -2,14 +2,14 @@ from sqlalchemy import Table, create_engine, MetaData
 from sqlalchemy.sql import select, and_
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
-
-from utilities.keys import *
-
+from flask_login import current_user
+from functools import wraps
 import random
 from mailjet_rest import Client
 import os
 from datetime import datetime,timedelta
 
+from utilities.keys import *
 
 
 db = SQLAlchemy()
@@ -270,3 +270,30 @@ def validate_password_key(email, key, engine):
     # finished with no erros; return True
     return True
     
+
+
+
+def layout_auth(mode,children):
+    '''
+    if mode is 'auth':
+        if user is not authenticated, returns children instead of the output of the function
+
+    if mode is 'nonauth':
+        if user is authenticated, returns children instead of the output of the function
+    '''
+    def this_decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if mode=='auth':
+                print('AUTH MODE')
+                if current_user.is_authenticated:
+                    return f(*args, **kwargs)
+                return children
+            else:# mode=='nonauth':
+                print('NONAUTH MODE')
+                if not current_user.is_authenticated:
+                    return f(*args, **kwargs)
+                return children
+        return decorated_function
+    return this_decorator
+
