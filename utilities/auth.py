@@ -277,9 +277,11 @@ def layout_auth(mode,children):
     '''
     if mode is 'auth':
         if user is not authenticated, returns children instead of the output of the function
+        i.e. the user needs to be logged in to see the page content (e.g. profile, home, etc.)
 
     if mode is 'nonauth':
         if user is authenticated, returns children instead of the output of the function
+        i.e. the user needs to be logged out to see the page content (e.g. register, login, etc.)
     '''
     def this_decorator(f):
         @wraps(f)
