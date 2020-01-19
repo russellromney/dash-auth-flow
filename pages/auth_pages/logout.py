@@ -46,3 +46,15 @@ def logout_card(n_clicks):
         return '/login',success_alert
     except:
         return '/login',failure_alert
+
+
+
+@app.callback(
+    Output('logout-url','pathname'),
+    [Input('logout-trigger','children')]
+)
+def logout_wait_and_reload(url):
+    if url is None or url=='':
+        return no_update
+    time.sleep(1.5)
+    return url

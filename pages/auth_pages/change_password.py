@@ -143,3 +143,14 @@ def submit_change(submit,email,key,password,confirm):
         pass
     return failure_alert, no_update
 
+
+@app.callback(
+    Output('change-url','pathname'),
+    [Input('change-trigger','children')]
+)
+def change_send_to_login(url):
+    if url is None or url=='':
+        return no_update
+    print('sleeping and going to profile')
+    time.sleep(1.5)
+    return url

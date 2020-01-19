@@ -170,3 +170,14 @@ def register_success(n_clicks,first,last,email,password,confirm):
         return '/login',success_alert
     else:
         return '',failure_alert
+
+
+@app.callback(
+    Output('register-url', 'pathname'),
+    [Input('register-trigger','children')]
+)
+def register_wait_and_reload(url):
+    if url is None or url=='':
+        return no_update
+    time.sleep(1.5)
+    return url

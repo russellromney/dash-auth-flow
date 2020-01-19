@@ -84,3 +84,16 @@ def forgot_submit(submit,email):
         return success_alert, '/change'
     else:
         return failure_alert, no_update    
+
+
+@app.callback(
+    Output('forgot-url','pathname'),
+    [Input('forgot-trigger','children')]
+)
+def forgot_send_to_change(url):
+    print(url)
+    if url is None or url=='':
+        return no_update
+    print('FORGOT - CHANGING URL')
+    time.sleep(1.5)
+    return url

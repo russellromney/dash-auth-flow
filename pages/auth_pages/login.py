@@ -39,7 +39,7 @@ def layout():
                 html.Div(id='login-alert'),
                 dbc.FormGroup(
                     [
-                        dbc.Alert('True test@test.com / test', color='info',dismissable=True),
+                        dbc.Alert('Try test@test.com / test', color='info',dismissable=True),
                         html.Br(),
 
                         dbc.Input(id='login-email',autoFocus=True),
@@ -90,3 +90,14 @@ def login_success(n_clicks, email, password):
             return no_update,failure_alert
     else:
         return no_update,''
+
+
+@app.callback(
+    Output('login-url', 'pathname'),
+    [Input('login-trigger','children')]
+)
+def login_wait_and_reload(url):
+    if url is None or url=='':
+        return no_update
+    time.sleep(1.5)
+    return url
