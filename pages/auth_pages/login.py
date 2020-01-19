@@ -29,18 +29,7 @@ already_login_alert = dbc.Alert(
 )
 
 
-@layout_auth('nonauth',
-    dbc.Row(
-        dbc.Col(
-            [
-                dcc.Location(id='login-url',refresh=True,pathname='/login'),
-                html.Div('/app/home',id='login-trigger',style=dict(display='none')),
-                html.Div(already_login_alert),
-            ],
-            width=6
-        )
-    )
-)
+@layout_auth('require-nonauthentication')
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -50,7 +39,7 @@ def layout():
                 html.Div(id='login-alert'),
                 dbc.FormGroup(
                     [
-                        dbc.Alert('True test@test.com / test', color='info',dismissable=True),
+                        dbc.Alert('Try test@test.com / test', color='info',dismissable=True),
                         html.Br(),
 
                         dbc.Input(id='login-email',autoFocus=True),
@@ -94,14 +83,13 @@ def login_success(n_clicks, email, password):
         if user:
             if check_password_hash(user.password, password):
                 login_user(user)
-                return '/app/home',success_alert
+                return '/home',success_alert
             else:
                 return no_update,failure_alert
         else:
             return no_update,failure_alert
     else:
         return no_update,''
-
 
 
 @app.callback(

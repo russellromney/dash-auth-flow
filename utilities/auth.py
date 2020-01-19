@@ -8,6 +8,9 @@ import random
 from mailjet_rest import Client
 import os
 from datetime import datetime,timedelta
+import shortuuid
+import dash_core_components as dcc
+import dash_html_components as html
 
 from utilities.keys import *
 
@@ -273,26 +276,28 @@ def validate_password_key(email, key, engine):
 
 
 
-def layout_auth(mode,children):
+def layout_auth(mode):
     '''
-    if mode is 'auth':
-        if user is not authenticated, returns children instead of the output of the function
+    if mode is 'require-authentication':
+        if user is not authenticated, sends the user to login page instead of returning the output of the function
         i.e. the user needs to be logged in to see the page content (e.g. profile, home, etc.)
 
-    if mode is 'nonauth':
-        if user is authenticated, returns children instead of the output of the function
+    if mode is 'require-nonauthentication':
+        if user is authenticated, sends the user to login page instead of returning the output of the function
         i.e. the user needs to be logged out to see the page content (e.g. register, login, etc.)
     '''
     def this_decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if mode=='auth':
-                print('AUTH MODE')
+            if mode=='require-authentication':
+                print('require-authentication')
                 if current_user.is_authenticated:
                     return f(*args, **kwargs)
-                return children
-            else:# mode=='nonauth':
-                print('NONAUTH MODE')
+                return html.Div(
+                    dcc.Location(id=shortuuid.uuid(),refresh=True,pathname='/login')
+                )
+            else:# mode=='require-nonauthentication':
+                print('require-nonauthentication')
                 if not current_user.is_authenticated:
                     return f(*args, **kwargs)
                 return children

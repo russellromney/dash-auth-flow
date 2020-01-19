@@ -29,12 +29,12 @@ from pages.auth_pages import (
 header = dbc.Navbar(
     dbc.Container(
         [
-            dbc.NavbarBrand("Dash Auth Flow", href="/app/home"),
+            dbc.NavbarBrand("Dash Auth Flow", href="/home"),
             dbc.Nav(
                 [
-                    dbc.NavItem(dbc.NavLink("Home", href="/app/home")),
-                    dbc.NavItem(dbc.NavLink("Page1", href="/app/page1")),
-                    dbc.NavItem(dbc.NavLink(id='user-name',href='/app/profile')),
+                    dbc.NavItem(dbc.NavLink("Home", href="/home")),
+                    dbc.NavItem(dbc.NavLink("Page1", href="/page1")),
+                    dbc.NavItem(dbc.NavLink(id='user-name',href='/profile')),
                     dbc.NavItem(dbc.NavLink('Login',id='user-action',href='Login'))
                 ]
             )
@@ -80,11 +80,11 @@ def router(pathname):
         return logout.layout()
     
     # app pages
-    elif pathname == '/' or pathname=='/home' or pathname=='/app/home':
+    elif pathname == '/' or pathname=='/home' or pathname=='/home':
         return home.layout()
-    elif pathname == '/profile' or pathname=='/app/profile':
+    elif pathname == '/profile' or pathname=='/profile':
         return profile.layout()
-    elif pathname == '/page1' or pathname=='/app/page1':
+    elif pathname == '/page1' or pathname=='/page1':
         return page1.layout()
 
     return html.Div(['404 - That page does not exist.',html.Br(),dcc.Link('Login',href='/login')])
@@ -118,8 +118,6 @@ def user_logout(input1):
         return 'Logout', '/logout'
     else:
         return 'Login', '/login'
-
-
 
 
 

@@ -18,18 +18,7 @@ failure_alert = dbc.Alert(
     color='danger',
 )
 
-@layout_auth('auth',
-    dbc.Row(
-        dbc.Col(
-            [
-                dcc.Location(id='logout-url', refresh=True,pathname='/logout'),
-                html.Div('/login',id='logout-trigger',style=dict(display='none')),
-                html.Div(failure_alert),
-            ],
-            width=6
-        )
-    )
-)
+@layout_auth('require-authentication')
 def layout():
     return dbc.Row(
         dbc.Col(

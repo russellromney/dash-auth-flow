@@ -3,7 +3,6 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output,Input,State
 from dash import no_update
-
 from flask_login import current_user
 import time
 
@@ -15,22 +14,12 @@ home_login_alert = dbc.Alert(
     color='danger'
 )
 
-@layout_auth('auth',
-    dbc.Row(
-        dbc.Col(
-            [
-                dcc.Location(id='home-url',refresh=True,pathname='/app/home'),
-                html.Div('/login',id='home-login-trigger',style=dict(display='none')),
-                html.Div(home_login_alert)
-            ]
-        )
-    )
-)
+@layout_auth('require-authentication')
 def layout():
     return dbc.Row(
         dbc.Col(
             [
-                dcc.Location(id='home-url',refresh=True,pathname='/app/home'),
+                dcc.Location(id='home-url',refresh=True,pathname='/home'),
                 html.Div(id='home-login-trigger',style=dict(display='none')),
 
                 html.H1('Home page'),
@@ -56,21 +45,3 @@ def home_test_update(trigger):
     '''    
     time.sleep(2)
     return html.Div('after the update',style=dict(color='red'))
-
-
-
-
-@app.callback(
-    Output('home-url','pathname'),
-    [Input('home-login-trigger','children')]
-)
-def home_send_to_login(url):
-    '''
-    if user isn't logged in, sends to login
-
-    only triggered if user not authenticated
-    '''
-    if url is None or url=='':
-        return no_update
-    time.sleep(1.5)
-    return url

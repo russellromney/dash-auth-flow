@@ -15,6 +15,7 @@ ipython = "*"
 validate-email = "*"
 gunicorn = "*"
 pylint = "*"
+shortuuid = "*"
 
 [requires]
 python_version = "3.7.3"

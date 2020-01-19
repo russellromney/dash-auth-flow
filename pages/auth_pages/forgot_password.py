@@ -30,20 +30,7 @@ already_login_alert = dbc.Alert(
     color='warning'
 )
 
-@layout_auth('nonauth',
-    dbc.Row(
-        dbc.Col(
-            [
-                dcc.Location(id='forgot-url',refresh=True,pathname='/forgot'),
-                html.Div(already_login_alert),
-                html.Div('/app/profile',id='forgot-trigger',style=dict(display='none')),
-
-
-            ],
-            width=6
-        )
-    )
-)
+@layout_auth('require-nonauthentication')
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -97,8 +84,6 @@ def forgot_submit(submit,email):
         return success_alert, '/change'
     else:
         return failure_alert, no_update    
-
-
 
 
 @app.callback(
