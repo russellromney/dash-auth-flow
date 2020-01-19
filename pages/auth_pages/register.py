@@ -162,7 +162,7 @@ def register_success(n_clicks,first,last,email,password,confirm):
     if n_clicks == 0:
         time.sleep(.25)
         if current_user.is_authenticated:
-            return '/app/home',already_registered_alert
+            return '/home',already_registered_alert
         else:
             return no_update,no_update
     

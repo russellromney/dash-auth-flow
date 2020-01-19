@@ -83,7 +83,7 @@ def login_success(n_clicks, email, password):
         if user:
             if check_password_hash(user.password, password):
                 login_user(user)
-                return '/app/home',success_alert
+                return '/home',success_alert
             else:
                 return no_update,failure_alert
         else:
