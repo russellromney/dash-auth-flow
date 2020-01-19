@@ -35,18 +35,7 @@ already_registered_alert = dbc.Alert(
     dismissable=True
 )
 
-@layout_auth('nonauth',
-    dbc.Row(
-        dbc.Col(
-            [
-                dcc.Location(id='register-url',refresh=True,pathname='/register'),
-                html.Div('/home',id='register-trigger',style=dict(display='none')),
-                html.Div(already_registered_alert)
-            ],
-            width=6
-        )
-    )
-)
+@layout_auth('require-nonauthentication')
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -181,16 +170,3 @@ def register_success(n_clicks,first,last,email,password,confirm):
         return '/login',success_alert
     else:
         return '',failure_alert
-
-
-
-
-@app.callback(
-    Output('register-url', 'pathname'),
-    [Input('register-trigger','children')]
-)
-def register_wait_and_reload(url):
-    if url is None or url=='':
-        return no_update
-    time.sleep(1.5)
-    return url

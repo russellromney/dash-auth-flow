@@ -29,18 +29,7 @@ already_login_alert = dbc.Alert(
 )
 
 
-@layout_auth('nonauth',
-    dbc.Row(
-        dbc.Col(
-            [
-                dcc.Location(id='login-url',refresh=True,pathname='/login'),
-                html.Div('/app/home',id='login-trigger',style=dict(display='none')),
-                html.Div(already_login_alert),
-            ],
-            width=6
-        )
-    )
-)
+@layout_auth('require-nonauthentication')
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -101,15 +90,3 @@ def login_success(n_clicks, email, password):
             return no_update,failure_alert
     else:
         return no_update,''
-
-
-
-@app.callback(
-    Output('login-url', 'pathname'),
-    [Input('login-trigger','children')]
-)
-def login_wait_and_reload(url):
-    if url is None or url=='':
-        return no_update
-    time.sleep(1.5)
-    return url

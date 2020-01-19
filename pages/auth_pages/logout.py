@@ -18,18 +18,7 @@ failure_alert = dbc.Alert(
     color='danger',
 )
 
-@layout_auth('auth',
-    dbc.Row(
-        dbc.Col(
-            [
-                dcc.Location(id='logout-url', refresh=True,pathname='/logout'),
-                html.Div('/login',id='logout-trigger',style=dict(display='none')),
-                html.Div(failure_alert),
-            ],
-            width=6
-        )
-    )
-)
+@layout_auth('require-authentication')
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -57,15 +46,3 @@ def logout_card(n_clicks):
         return '/login',success_alert
     except:
         return '/login',failure_alert
-
-
-
-@app.callback(
-    Output('logout-url','pathname'),
-    [Input('logout-trigger','children')]
-)
-def logout_wait_and_reload(url):
-    if url is None or url=='':
-        return no_update
-    time.sleep(1.5)
-    return url

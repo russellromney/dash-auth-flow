@@ -33,18 +33,7 @@ already_login_alert = dbc.Alert(
     color='warning'
 )
 
-@layout_auth('nonauth',
-    dbc.Row(
-        dbc.Col(
-            [
-                dcc.Location(id='change-url',refresh=True,pathname='/change'),
-                html.Div(already_login_alert),
-                html.Div('/app/profile',id='change-trigger',style=dict(display='none')),
-            ],
-            width=6
-        )
-    )
-)
+@layout_auth('require-nonauthentication')
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -154,16 +143,3 @@ def submit_change(submit,email,key,password,confirm):
         pass
     return failure_alert, no_update
 
-
-
-
-@app.callback(
-    Output('change-url','pathname'),
-    [Input('change-trigger','children')]
-)
-def change_send_to_login(url):
-    if url is None or url=='':
-        return no_update
-    print('sleeping and going to profile')
-    time.sleep(1.5)
-    return url

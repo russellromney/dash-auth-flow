@@ -26,23 +26,12 @@ login_alert = dbc.Alert(
 )
 
 
-@layout_auth('auth',
-    dbc.Row(
-        dbc.Col(
-            [
-                dcc.Location(id='profile-url', refresh=True),
-                html.Div(login_alert),
-                html.Div('/login',id='profile-login-trigger',style=dict(display='none')),
-            ],
-            width=6
-        )
-    )
-)
+@layout_auth('require-authentication')
 def layout():
     return dbc.Row(
         dbc.Col(
             [
-                dcc.Location(id='profile-url', refresh=True,pathname='/app/profile'),
+                dcc.Location(id='profile-url', refresh=True,pathname='/profile'),
                 html.Div(1,id='profile-trigger',style=dict(display='none')),
                 
                 html.H3('Profile',id='profile-title'),
@@ -215,15 +204,3 @@ def profile_save_changes(n_clicks,first,last,password):
         return success_alert,1
     
     return failure_alert,0
-
-
-
-@app.callback(
-    Output('profile-url','pathname'),
-    [Input('profile-login-trigger','children')]
-)
-def profile_send_to_login(url):
-    if url is None or url=='':
-        return no_update
-    time.sleep(1.5)
-    return url
