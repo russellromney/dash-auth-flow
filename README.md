@@ -21,9 +21,6 @@ python app.py
 
 ![](example.gif)
 
-
-As of 10/15/2019, this is updated to use a custom decorator to redirect to login if not logged in. See the last 20 lines of `utilities/auth.py`
-
 ---
 
 Notes:
