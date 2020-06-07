@@ -11,10 +11,8 @@ from sqlalchemy.sql import select
 
 from server import app, User, engine
 from utilities.auth import (
-    user_exists,
     send_password_key,
     user_table,
-    layout_auth
 )
 
 success_alert = dbc.Alert(
@@ -30,13 +28,12 @@ already_login_alert = dbc.Alert(
     color='warning'
 )
 
-@layout_auth('require-nonauthentication')
 def layout():
     return dbc.Row(
         dbc.Col(
             [
                 html.H3('Forgot Password'),
-                dcc.Location(id='forgot-url',refresh=True,pathname='/forgot'),
+                dcc.Location(id='forgot-url',refresh=True),
                 dbc.FormGroup(
                     [
                         html.Div(id='forgot-alert'),
@@ -60,7 +57,7 @@ def layout():
 
 @app.callback(
     [Output('forgot-alert','children'),
-     Output('forgot-trigger','children')],
+     Output('forgot-url','pathname')],
     [Input('forgot-button','n_clicks')],
     [State('forgot-email','value')]
 )
@@ -83,17 +80,4 @@ def forgot_submit(submit,email):
     if send_password_key(email, firstname, engine):
         return success_alert, '/change'
     else:
-        return failure_alert, no_update    
-
-
-@app.callback(
-    Output('forgot-url','pathname'),
-    [Input('forgot-trigger','children')]
-)
-def forgot_send_to_change(url):
-    print(url)
-    if url is None or url=='':
-        return no_update
-    print('FORGOT - CHANGING URL')
-    time.sleep(1.5)
-    return url
+        return failure_alert, no_update

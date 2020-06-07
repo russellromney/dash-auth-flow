@@ -7,19 +7,17 @@ from flask_login import current_user
 import time
 
 from server import app
-from utilities.auth import layout_auth
 
 home_login_alert = dbc.Alert(
     'User not logged in. Taking you to login.',
     color='danger'
 )
 
-@layout_auth('require-authentication')
 def layout():
     return dbc.Row(
         dbc.Col(
             [
-                dcc.Location(id='home-url',refresh=True,pathname='/home'),
+                dcc.Location(id='home-url',refresh=True),
                 html.Div(id='home-login-trigger',style=dict(display='none')),
 
                 html.H1('Home page'),

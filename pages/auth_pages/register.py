@@ -14,8 +14,6 @@ from utilities.auth import (
     add_user,
     user_exists,
     db,
-    user_table,
-    layout_auth
 )
 
 
@@ -35,12 +33,11 @@ already_registered_alert = dbc.Alert(
     dismissable=True
 )
 
-@layout_auth('require-nonauthentication')
 def layout():
     return dbc.Row(
         dbc.Col(
             [
-                dcc.Location(id='register-url',refresh=True,pathname='/register'),
+                dcc.Location(id='register-url',refresh=True,),
                 html.Div(id='register-trigger',style=dict(display='none')),
                 html.Div(id='register-alert'),
                 dbc.FormGroup(
@@ -153,7 +150,7 @@ def register_validate_inputs(first,last,email,password,confirm):
 
 
 @app.callback(
-    [Output('register-trigger', 'children'),
+    [Output('register-url', 'pathname'),
      Output('register-alert', 'children')],
     [Input('register-button', 'n_clicks')],
     [State('register-'+x, 'value') for x in ['first','last','email','password','confirm']],
@@ -170,14 +167,3 @@ def register_success(n_clicks,first,last,email,password,confirm):
         return '/login',success_alert
     else:
         return '',failure_alert
-
-
-@app.callback(
-    Output('register-url', 'pathname'),
-    [Input('register-trigger','children')]
-)
-def register_wait_and_reload(url):
-    if url is None or url=='':
-        return no_update
-    time.sleep(1.5)
-    return url

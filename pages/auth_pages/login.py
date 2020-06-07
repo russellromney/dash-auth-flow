@@ -9,7 +9,6 @@ from werkzeug.security import check_password_hash
 import time
 
 from server import app, User
-from utilities.auth import layout_auth
 
 
 success_alert = dbc.Alert(
@@ -29,7 +28,6 @@ already_login_alert = dbc.Alert(
 )
 
 
-@layout_auth('require-nonauthentication')
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -68,7 +66,7 @@ def layout():
 
 
 @app.callback(
-    [Output('login-trigger', 'children'),
+    [Output('login-url', 'pathname'),
      Output('login-alert', 'children')],
     [Input('login-button', 'n_clicks')],
     [State('login-email', 'value'),
@@ -83,6 +81,7 @@ def login_success(n_clicks, email, password):
         if user:
             if check_password_hash(user.password, password):
                 login_user(user)
+
                 return '/home',success_alert
             else:
                 return no_update,failure_alert
@@ -90,14 +89,3 @@ def login_success(n_clicks, email, password):
             return no_update,failure_alert
     else:
         return no_update,''
-
-
-@app.callback(
-    Output('login-url', 'pathname'),
-    [Input('login-trigger','children')]
-)
-def login_wait_and_reload(url):
-    if url is None or url=='':
-        return no_update
-    time.sleep(1.5)
-    return url

@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash
 import time
 
 from server import app, User, engine
-from utilities.auth import change_user, change_password, layout_auth
+from utilities.auth import change_user, change_password
 
 
 success_alert = dbc.Alert(
@@ -26,12 +26,11 @@ login_alert = dbc.Alert(
 )
 
 
-@layout_auth('require-authentication')
 def layout():
     return dbc.Row(
         dbc.Col(
             [
-                dcc.Location(id='profile-url', refresh=True,pathname='/profile'),
+                dcc.Location(id='profile-url', refresh=True,    ),
                 html.Div(1,id='profile-trigger',style=dict(display='none')),
                 
                 html.H3('Profile',id='profile-title'),

@@ -25,7 +25,7 @@ app.title = 'Dash Auth Flow'
 
 # config
 server.config.update(
-    SECRET_KEY=os.urandom(20),
+    SECRET_KEY='make this key random or hard to guess',
     SQLALCHEMY_DATABASE_URI=config.get('database', 'con'),
     SQLALCHEMY_TRACK_MODIFICATIONS=False
 )

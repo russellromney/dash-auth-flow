@@ -8,7 +8,6 @@ from flask_login import current_user
 import time
 from functools import wraps
 
-from utilities.auth import layout_auth
 from server import app
 
 login_alert = dbc.Alert(
@@ -16,9 +15,8 @@ login_alert = dbc.Alert(
     color='danger'
 )
 
-location = dcc.Location(id='page1-url',refresh=True,pathname='/page1')
+location = dcc.Location(id='page1-url',refresh=True)
 
-@layout_auth('require-authentication')
 def layout():
     #if current_user.is_authenticated:
     return dbc.Row(
