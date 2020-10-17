@@ -199,7 +199,7 @@ def send_password_key(email, firstname, engine):
     # change their current password to a random string
     # first, get first and last name
     random_password = "".join([random.choice("1234567890") for x in range(15)])
-    res = change_password(email, random_password, engine):
+    res = change_password(email, random_password, engine)
     if res:
         # finished successfully
         return True
