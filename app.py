@@ -12,19 +12,21 @@ from flask_login import logout_user, current_user
 from pages import (
     home,
     profile,
-    page1
+    page1,
 )
 
 # app authentication 
 from pages.auth_pages import (
     login,
-    logout,
     register,
     forgot_password,
-    change_password
+    change_password,
 )
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 header = dbc.Navbar(
     dbc.Container(
         [
@@ -65,28 +67,42 @@ app.layout = html.Div(
 def router(pathname):
     '''
     routes to correct page based on pathname
-    '''    
+    '''
+    print('routing shit to',pathname)
     # auth pages
     if pathname == '/login':
-        return login.layout()
+        if not current_user.is_authenticated:
+            return login.layout()
     elif pathname =='/register':
-        return register.layout()
+        if not current_user.is_authenticated:
+            return register.layout()
     elif pathname == '/change':
-        return change_password.layout()
+        if not current_user.is_authenticated:
+            return change_password.layout()
     elif pathname == '/forgot':
-        return forgot_password.layout()
+        if not current_user.is_authenticated:
+            return forgot_password.layout()
     elif pathname == '/logout':
-        return logout.layout()
+        if current_user.is_authenticated:
+            logout_user()
     
     # app pages
     elif pathname == '/' or pathname=='/home' or pathname=='/home':
-        return home.layout()
+        if current_user.is_authenticated:
+            return home.layout()
     elif pathname == '/profile' or pathname=='/profile':
-        return profile.layout()
+        if current_user.is_authenticated:
+            return profile.layout()
     elif pathname == '/page1' or pathname=='/page1':
-        return page1.layout()
+        if current_user.is_authenticated:
+            return page1.layout()
 
-    return html.Div(['404 - That page does not exist.',html.Br(),dcc.Link('Login',href='/login')])
+    # DEFAULT LOGGED IN: /home
+    if current_user.is_authenticated:
+        return home.layout()
+    
+    # DEFAULT NOT LOGGED IN: /login
+    return login.layout()
 
 
 @app.callback(

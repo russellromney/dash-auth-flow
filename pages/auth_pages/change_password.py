@@ -11,11 +11,7 @@ from sqlalchemy.sql import select
 from server import app, User, engine
 from utilities.auth import (
     validate_password_key,
-    user_exists,
-    change_user,
-    user_table,
     change_password,
-    layout_auth
 )
 
 import time
@@ -33,13 +29,12 @@ already_login_alert = dbc.Alert(
     color='warning'
 )
 
-@layout_auth('require-nonauthentication')
 def layout():
     return dbc.Row(
         dbc.Col(
             [
                 html.H3('Change Password'),
-                dcc.Location(id='change-url',refresh=True,pathname='/change'),
+                dcc.Location(id='change-url',refresh=True),
                 html.Div(id='change-trigger',style=dict(display='none')),
                 dbc.FormGroup(
                     [
@@ -114,13 +109,10 @@ def change_validate_inputs(password,confirm):
         disabled
     )
 
-    
-
-
 
 @app.callback(
     [Output('change-alert','children'),
-     Output('change-trigger','children')],
+     Output('change-url','pathname')],
     [Input('change-button','n_clicks')],
     [State('change-email','value'),
      State('change-key','value'),
@@ -139,14 +131,3 @@ def submit_change(submit,email,key,password,confirm):
     else:
         pass
     return failure_alert, no_update
-
-
-@app.callback(
-    Output('change-url','pathname'),
-    [Input('change-trigger','children')]
-)
-def change_send_to_login(url):
-    if url is None or url=='':
-        return no_update
-    time.sleep(1.5)
-    return url

@@ -28,6 +28,10 @@ String = sqlalchemy.String
 Integer = sqlalchemy.Integer
 DateTime = sqlalchemy.DateTime
 db = SQLAlchemy()
+<<<<<<< HEAD
+=======
+Column, String, Integer, DateTime = db.Column, db.String, db.Integer, db.DateTime
+>>>>>>> master
 
 
 class User(db.Model):
@@ -40,7 +44,10 @@ class User(db.Model):
 
 def user_table():
     return Table("user", User.metadata)
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 
 
 def add_user(first, last, password, email, engine):
@@ -71,6 +78,10 @@ def show_users(engine):
 
     conn.close()
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 def del_user(email, engine):
     table = user_table()
 
@@ -80,6 +91,10 @@ def del_user(email, engine):
     conn.execute(delete)
     conn.close()
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 def user_exists(email, engine):
     """
     checks if the user exists with email <email>
@@ -110,6 +125,10 @@ def change_password(email, password, engine):
     # success value
     return True
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 def change_user(first, last, email, engine):
     # if there is no user in the database with that email, return False
     if not user_exists(email, engine):
@@ -117,7 +136,11 @@ def change_user(first, last, email, engine):
 
     # otherwise, that user exists; update that user's info
     table = user_table()
+<<<<<<< HEAD
     values = dict(first=first, last=last)
+=======
+    values = dict(first=first, last=last,)
+>>>>>>> master
     statement = table.update(table).where(table.c.email == email).values(values)
     with engine.connect() as conn:
         conn.execute(statement)
@@ -169,7 +192,11 @@ def send_password_key(email, firstname, engine):
             "Messages": [
                 {
                     "From": {"Email": FROM_EMAIL, "Name": "My App"},
+<<<<<<< HEAD
                     "To": [{"Email": email, "Name": first}],
+=======
+                    "To": [{"Email": email, "Name": first,}],
+>>>>>>> master
                     "Subject": "Greetings from Mailjet.",
                     "TextPart": "My App password reset code",
                     "HTMLPart": "<p>Dear {},<p> <p>Your My App password reset code is: <strong>{}</strong>".format(
@@ -180,8 +207,16 @@ def send_password_key(email, firstname, engine):
             ]
         }
         result = mailjet.send.create(data=data)
+<<<<<<< HEAD
         if result.status_code != "200":
             print("status not 200")
+=======
+        print(result.status_code)
+        if result.status_code != "200":
+            print("status not 200")
+        print(result.json())
+        print("SENT EMAIL")
+>>>>>>> master
     except Exception as e:
         traceback.print_exc(e)
         return False
@@ -193,18 +228,31 @@ def send_password_key(email, firstname, engine):
     try:
         with engine.connect() as conn:
             conn.execute(statement)
+<<<<<<< HEAD
+=======
+        print("STORED KEY")
+>>>>>>> master
     except:
         return False
 
     # change their current password to a random string
     # first, get first and last name
     random_password = "".join([random.choice("1234567890") for x in range(15)])
+<<<<<<< HEAD
     res = change_password(email, random_password, engine):
     if res:
         # finished successfully
         return True
     return False
+=======
+    if change_password(email, random_password, engine):
+        print("CHANGED USER PASSWORD")
+    else:
+        return False
 
+    # finished successfully
+    return True
+>>>>>>> master
 
 
 def validate_password_key(email, key, engine):
@@ -221,6 +269,7 @@ def validate_password_key(email, key, engine):
         resp = list(conn.execute(statement))
         if len(resp) == 1:
             if (resp[0].timestamp - (datetime.now() - timedelta(1))).days < 1:
+<<<<<<< HEAD
                 return True
         return False
 
@@ -258,3 +307,11 @@ def layout_auth(mode):
         return decorated_function
 
     return this_decorator
+=======
+                print("PASSWORD KEY IS VALID")
+                return True
+        return False
+
+    # finished with no erros; return True
+    return True
+>>>>>>> master
