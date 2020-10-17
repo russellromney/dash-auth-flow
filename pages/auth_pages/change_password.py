@@ -131,15 +131,12 @@ def submit_change(submit,email,key,password,confirm):
     # all inputs have been previously validated
     # validate_password_key(email,key,engine)
     if validate_password_key(email,key,engine):
-        print('validate password success')
         # if that returns true, update the user information
         if change_password(email,password,engine):
             return success_alert,'/login' 
         else:
-            print('validate password failed - at after change user')
             pass
     else:
-        print('validate password failed')
         pass
     return failure_alert, no_update
 
@@ -151,6 +148,5 @@ def submit_change(submit,email,key,password,confirm):
 def change_send_to_login(url):
     if url is None or url=='':
         return no_update
-    print('sleeping and going to profile')
     time.sleep(1.5)
     return url

@@ -25,7 +25,6 @@ from pages.auth_pages import (
 )
 
 
-
 header = dbc.Navbar(
     dbc.Container(
         [
@@ -55,7 +54,7 @@ app.layout = html.Div(
                 )
             ]
         ),
-        dcc.Location(id='base-url', refresh=False)
+        dcc.Location(id='base-url', refresh=True)
     ]
 )
 
@@ -90,9 +89,6 @@ def router(pathname):
     return html.Div(['404 - That page does not exist.',html.Br(),dcc.Link('Login',href='/login')])
 
 
-
-
-
 @app.callback(
     Output('user-name', 'children'),
     [Input('page-content', 'children')])
@@ -118,8 +114,6 @@ def user_logout(input1):
         return 'Logout', '/logout'
     else:
         return 'Login', '/login'
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

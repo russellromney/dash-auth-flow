@@ -1,8 +1,6 @@
-# Dash app initialization
+# external imports
 import dash
 import dash_bootstrap_components as dbc
-
-# global imports
 import os
 from flask_login import LoginManager, UserMixin
 import random
@@ -14,7 +12,8 @@ from utilities.config import config, engine
 
 app = dash.Dash(
     __name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP]
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    prevent_initial_callbacks=True,
 )
 
 server = app.server

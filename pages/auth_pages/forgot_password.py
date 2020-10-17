@@ -66,13 +66,11 @@ def layout():
 )
 def forgot_submit(submit,email):
     # get first name
-    print('getting first name')
     table = user_table()
     statement = select([table.c.first]).\
                 where(table.c.email==email)
     conn = engine.connect()
     resp = list(conn.execute(statement))
-    resp[0].first
     if len(resp)==0:
         return failure_alert, no_update    
     else:
@@ -91,9 +89,7 @@ def forgot_submit(submit,email):
     [Input('forgot-trigger','children')]
 )
 def forgot_send_to_change(url):
-    print(url)
     if url is None or url=='':
         return no_update
-    print('FORGOT - CHANGING URL')
     time.sleep(1.5)
     return url
