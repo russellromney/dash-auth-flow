@@ -23,10 +23,6 @@ from pages.auth_pages import (
     change_password,
 )
 
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 header = dbc.Navbar(
     dbc.Container(
         [
