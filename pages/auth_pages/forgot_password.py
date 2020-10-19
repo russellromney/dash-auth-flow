@@ -63,13 +63,11 @@ def layout():
 )
 def forgot_submit(submit,email):
     # get first name
-    print('getting first name')
     table = user_table()
     statement = select([table.c.first]).\
                 where(table.c.email==email)
     conn = engine.connect()
     resp = list(conn.execute(statement))
-    resp[0].first
     if len(resp)==0:
         return failure_alert, no_update    
     else:

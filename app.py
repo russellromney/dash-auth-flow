@@ -52,7 +52,7 @@ app.layout = html.Div(
                 )
             ]
         ),
-        dcc.Location(id='base-url', refresh=False)
+        dcc.Location(id='base-url', refresh=True)
     ]
 )
 
@@ -64,7 +64,9 @@ def router(pathname):
     '''
     routes to correct page based on pathname
     '''
-    print('routing shit to',pathname)
+    # for debug
+    print('routing to',pathname)
+    
     # auth pages
     if pathname == '/login':
         if not current_user.is_authenticated:
@@ -101,9 +103,6 @@ def router(pathname):
     return login.layout()
 
 
-
-
-
 @app.callback(
     Output('user-name', 'children'),
     [Input('page-content', 'children')])
@@ -129,8 +128,6 @@ def user_logout(input1):
         return 'Logout', '/logout'
     else:
         return 'Login', '/login'
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

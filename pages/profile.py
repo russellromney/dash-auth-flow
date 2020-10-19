@@ -120,7 +120,7 @@ def profile_values(trigger):
 @app.callback(
     [Output('profile-'+x,'valid') for x in ['first-input','last-input','password-input','password-confirm']]+\
     [Output('profile-'+x,'invalid') for x in ['first-input','last-input','password-input','password-confirm']]+\
-    [Output('profile-'+x,'color') for x in ['-password-input-formtext','-password-confirm-formtext']]+\
+    [Output('profile-'+x,'color') for x in ['password-input-formtext','password-confirm-formtext']]+\
     [Output('profile-submit','disabled')],
     [Input('profile-'+x,'value') for x in ['first-input','last-input','password-input','password-confirm']]
 )

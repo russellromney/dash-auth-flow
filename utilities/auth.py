@@ -1,6 +1,9 @@
+# external imports
+import traceback
 from sqlalchemy import Table, create_engine, MetaData
 from sqlalchemy.sql import select, and_
 from flask_sqlalchemy import SQLAlchemy
+import sqlalchemy
 from werkzeug.security import generate_password_hash
 from flask_login import current_user
 from functools import wraps
@@ -12,9 +15,18 @@ import shortuuid
 import dash_core_components as dcc
 import dash_html_components as html
 
-from utilities.keys import *
+# local imports
+from utilities.keys import (
+    MAILJET_API_KEY,
+    MAILJET_API_SECRET,
+    FROM_EMAIL
+)
 
 
+Column = sqlalchemy.Column
+String = sqlalchemy.String
+Integer = sqlalchemy.Integer
+DateTime = sqlalchemy.DateTime
 db = SQLAlchemy()
 Column, String, Integer, DateTime = db.Column, db.String, db.Integer, db.DateTime
 
@@ -59,7 +71,6 @@ def show_users(engine):
 
     conn.close()
 
-
 def del_user(email, engine):
     table = user_table()
 
@@ -68,7 +79,6 @@ def del_user(email, engine):
     conn = engine.connect()
     conn.execute(delete)
     conn.close()
-
 
 def user_exists(email, engine):
     """
@@ -99,7 +109,6 @@ def change_password(email, password, engine):
 
     # success value
     return True
-
 
 def change_user(first, last, email, engine):
     # if there is no user in the database with that email, return False
@@ -171,13 +180,10 @@ def send_password_key(email, firstname, engine):
             ]
         }
         result = mailjet.send.create(data=data)
-        print(result.status_code)
         if result.status_code != "200":
             print("status not 200")
-        print(result.json())
-        print("SENT EMAIL")
     except Exception as e:
-        print(e)
+        traceback.print_exc(e)
         return False
 
     # store that key in the password_key table
@@ -187,20 +193,17 @@ def send_password_key(email, firstname, engine):
     try:
         with engine.connect() as conn:
             conn.execute(statement)
-        print("STORED KEY")
     except:
         return False
 
     # change their current password to a random string
     # first, get first and last name
     random_password = "".join([random.choice("1234567890") for x in range(15)])
-    if change_password(email, random_password, engine):
-        print("CHANGED USER PASSWORD")
-    else:
-        return False
-
-    # finished successfully
-    return True
+    res = change_password(email, random_password, engine)
+    if res:
+        # finished successfully
+        return True
+    return False
 
 
 def validate_password_key(email, key, engine):
@@ -217,7 +220,6 @@ def validate_password_key(email, key, engine):
         resp = list(conn.execute(statement))
         if len(resp) == 1:
             if (resp[0].timestamp - (datetime.now() - timedelta(1))).days < 1:
-                print("PASSWORD KEY IS VALID")
                 return True
         return False
 
