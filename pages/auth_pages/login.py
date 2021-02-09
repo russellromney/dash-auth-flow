@@ -44,7 +44,7 @@ def layout():
                         dbc.FormText('Email'),
                         
                         html.Br(),
-                        dbc.Input(id='login-password',type='password'),
+                        dbc.Input(id='login-password',type='password',debounce=True),
                         dbc.FormText('Password'),
                         
                         html.Br(),
@@ -63,20 +63,18 @@ def layout():
         )
     )
 
-
-
 @app.callback(
     [Output('login-url', 'pathname'),
      Output('login-alert', 'children')],
-    [Input('login-button', 'n_clicks')],
-    [State('login-email', 'value'),
-     State('login-password', 'value')]
+    [Input('login-button', 'n_clicks'),
+     Input('login-password', 'value')],
+    [State('login-email', 'value')]
 )
-def login_success(n_clicks, email, password):
+def login_success(n_clicks, password, email):
     '''
     logs in the user
     '''
-    if n_clicks > 0:
+    if password is not None or n_clicks > 0:
         user = User.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
