@@ -48,7 +48,7 @@ def layout():
                         dbc.FormText('Password'),
                         
                         html.Br(),
-                        dbc.Button('Submit',color='primary',id='login-button'),
+                        dbc.Button('Submit',color='primary',id='login-button', n_clicks=0),
                         #dbc.FormText(id='output-state')
                         
                         html.Br(),
