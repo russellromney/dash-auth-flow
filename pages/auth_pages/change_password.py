@@ -1,12 +1,5 @@
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html, dcc, Input, Output, State, no_update
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
-from dash import no_update
-
-from flask_login import login_user, current_user
-from werkzeug.security import check_password_hash
-from sqlalchemy.sql import select
 
 from server import app, User, engine
 from utilities.auth import (
@@ -36,28 +29,24 @@ def layout():
                 html.H3("Change Password"),
                 dcc.Location(id="change-url", refresh=True),
                 html.Div(id="change-trigger", style=dict(display="none")),
-                dbc.FormGroup(
-                    [
-                        html.Div(id="change-alert"),
-                        html.Br(),
-                        dbc.Input(id="change-email", autoFocus=True),
-                        dbc.FormText("Email"),
-                        html.Br(),
-                        dbc.Input(id="change-key", type="password"),
-                        dbc.FormText("Code"),
-                        html.Br(),
-                        dbc.Input(id="change-password", type="password"),
-                        dbc.FormText("New password"),
-                        html.Br(),
-                        dbc.Input(id="change-confirm", type="password"),
-                        dbc.FormText("Confirm new password"),
-                        html.Br(),
-                        dbc.Button(
-                            "Submit password change",
-                            id="change-button",
-                            color="primary",
-                        ),
-                    ]
+                html.Div(id="change-alert"),
+                html.Br(),
+                dbc.Input(id="change-email", autoFocus=True),
+                dbc.FormText("Email"),
+                html.Br(),
+                dbc.Input(id="change-key", type="password"),
+                dbc.FormText("Code"),
+                html.Br(),
+                dbc.Input(id="change-password", type="password"),
+                dbc.FormText("New password"),
+                html.Br(),
+                dbc.Input(id="change-confirm", type="password"),
+                dbc.FormText("Confirm new password"),
+                html.Br(),
+                dbc.Button(
+                    "Submit password change",
+                    id="change-button",
+                    color="primary",
                 ),
             ],
             width=6,

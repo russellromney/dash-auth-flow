@@ -1,12 +1,6 @@
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html, dcc, Input, Output, State, no_update
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
-from dash import no_update
-
-from flask_login import login_user, current_user
-from werkzeug.security import check_password_hash
-import time
+from flask_login import current_user
 
 from server import app, User, engine
 from utilities.auth import change_user, change_password
@@ -40,61 +34,53 @@ def layout():
                 html.Div(id="profile-alert-login"),
                 html.Div(id="profile-login-trigger", style=dict(display="none")),
                 html.Br(),
-                dbc.FormGroup(
-                    [
-                        # First, first input, and formtext
-                        dbc.Label("First:", id="profile-first"),
-                        dbc.Input(
-                            placeholder="Change first name...", id="profile-first-input"
-                        ),
-                        dbc.FormText(id="profile-first-formtext", color="secondary"),
-                        html.Br(),
-                        # last, last input, and formtext
-                        dbc.Label("Last:", id="profile-last"),
-                        dbc.Input(
-                            placeholder="Change last name...", id="profile-last-input"
-                        ),
-                        dbc.FormText(id="profile-last-formtext", color="secondary"),
-                        html.Br(),
-                        # email, formtext
-                        dbc.Label("Email:", id="profile-email"),
-                        dbc.FormText("Cannot change email", color="secondary"),
-                        html.Br(),
-                        html.Hr(),
-                        html.Br(),
-                        # password, input, confirm input
-                        dbc.Label("Change password", id="profile-password"),
-                        dbc.Input(
-                            placeholder="Change password...",
-                            id="profile-password-input",
-                            type="password",
-                        ),
-                        dbc.FormText(
-                            "Change password",
-                            color="secondary",
-                            id="profile-password-input-formtext",
-                        ),
-                        html.Br(),
-                        dbc.Input(
-                            placeholder="Confirm password...",
-                            id="profile-password-confirm",
-                            type="password",
-                        ),
-                        dbc.FormText(
-                            "Confirm password",
-                            color="secondary",
-                            id="profile-password-confirm-formtext",
-                        ),
-                        html.Br(),
-                        html.Hr(),
-                        html.Br(),
-                        dbc.Button(
-                            "Save changes",
-                            color="primary",
-                            id="profile-submit",
-                            disabled=True,
-                        ),
-                    ]  # end formgroup
+                # First, first input, and formtext
+                dbc.Label("First:", id="profile-first"),
+                dbc.Input(placeholder="Change first name...", id="profile-first-input"),
+                dbc.FormText(id="profile-first-formtext", color="secondary"),
+                html.Br(),
+                # last, last input, and formtext
+                dbc.Label("Last:", id="profile-last"),
+                dbc.Input(placeholder="Change last name...", id="profile-last-input"),
+                dbc.FormText(id="profile-last-formtext", color="secondary"),
+                html.Br(),
+                # email, formtext
+                dbc.Label("Email:", id="profile-email"),
+                dbc.FormText("Cannot change email", color="secondary"),
+                html.Br(),
+                html.Hr(),
+                html.Br(),
+                # password, input, confirm input
+                dbc.Label("Change password", id="profile-password"),
+                dbc.Input(
+                    placeholder="Change password...",
+                    id="profile-password-input",
+                    type="password",
+                ),
+                dbc.FormText(
+                    "Change password",
+                    color="secondary",
+                    id="profile-password-input-formtext",
+                ),
+                html.Br(),
+                dbc.Input(
+                    placeholder="Confirm password...",
+                    id="profile-password-confirm",
+                    type="password",
+                ),
+                dbc.FormText(
+                    "Confirm password",
+                    color="secondary",
+                    id="profile-password-confirm-formtext",
+                ),
+                html.Br(),
+                html.Hr(),
+                html.Br(),
+                dbc.Button(
+                    "Save changes",
+                    color="primary",
+                    id="profile-submit",
+                    disabled=True,
                 ),
             ],  # end col
             width=6,

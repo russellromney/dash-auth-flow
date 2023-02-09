@@ -1,9 +1,5 @@
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html, dcc, Input, Output, State, no_update
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
-from dash import no_update
-
 from flask_login import login_user, current_user
 from werkzeug.security import check_password_hash
 import time
@@ -34,20 +30,16 @@ def layout():
             [
                 html.H3("Forgot Password"),
                 dcc.Location(id="forgot-url", refresh=True),
-                dbc.FormGroup(
-                    [
-                        html.Div(id="forgot-alert"),
-                        html.Div(id="forgot-trigger", style=dict(display="none")),
-                        html.Br(),
-                        dbc.Input(id="forgot-email", autoFocus=True),
-                        dbc.FormText("Email"),
-                        html.Br(),
-                        dbc.Button(
-                            "Submit email to receive code",
-                            id="forgot-button",
-                            color="primary",
-                        ),
-                    ]
+                html.Div(id="forgot-alert"),
+                html.Div(id="forgot-trigger", style=dict(display="none")),
+                html.Br(),
+                dbc.Input(id="forgot-email", autoFocus=True),
+                dbc.FormText("Email"),
+                html.Br(),
+                dbc.Button(
+                    "Submit email to receive code",
+                    id="forgot-button",
+                    color="primary",
                 ),
             ],
             width=6,

@@ -1,10 +1,7 @@
 # index page
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import html, dcc, Input, Output, State, no_update
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
 
-from flask import redirect
 from server import app, server
 from flask_login import logout_user, current_user
 

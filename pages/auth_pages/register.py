@@ -1,9 +1,5 @@
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html, dcc, Input, Output, State, no_update
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
-from dash import no_update
-
 from flask_login import login_user, current_user
 from werkzeug.security import check_password_hash
 import time
@@ -38,28 +34,22 @@ def layout():
                 ),
                 html.Div(id="register-trigger", style=dict(display="none")),
                 html.Div(id="register-alert"),
-                dbc.FormGroup(
-                    [
-                        dbc.Input(id="register-first", autoFocus=True),
-                        dbc.FormText("First"),
-                        html.Br(),
-                        dbc.Input(id="register-last"),
-                        dbc.FormText("Last"),
-                        html.Br(),
-                        dbc.Input(id="register-email"),
-                        dbc.FormText(
-                            "Email", id="register-email-formtext", color="secondary"
-                        ),
-                        html.Br(),
-                        dbc.Input(id="register-password", type="password"),
-                        dbc.FormText("Password"),
-                        html.Br(),
-                        dbc.Input(id="register-confirm", type="password"),
-                        dbc.FormText("Confirm password"),
-                        html.Br(),
-                        dbc.Button("Submit", color="primary", id="register-button"),
-                    ]
-                ),
+                dbc.Input(id="register-first", autoFocus=True),
+                dbc.FormText("First"),
+                html.Br(),
+                dbc.Input(id="register-last"),
+                dbc.FormText("Last"),
+                html.Br(),
+                dbc.Input(id="register-email"),
+                dbc.FormText("Email", id="register-email-formtext", color="secondary"),
+                html.Br(),
+                dbc.Input(id="register-password", type="password"),
+                dbc.FormText("Password"),
+                html.Br(),
+                dbc.Input(id="register-confirm", type="password"),
+                dbc.FormText("Confirm password"),
+                html.Br(),
+                dbc.Button("Submit", color="primary", id="register-button"),
             ],
             width=6,
         )

@@ -1,19 +1,13 @@
 # external imports
 import traceback
-from sqlalchemy import Table, create_engine, MetaData
+from sqlalchemy import Table
 from sqlalchemy.sql import select, and_
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 from werkzeug.security import generate_password_hash
-from flask_login import current_user
-from functools import wraps
 import random
 from mailjet_rest import Client
-import os
 from datetime import datetime, timedelta
-import shortuuid
-import dash_core_components as dcc
-import dash_html_components as html
 
 # local imports
 from utilities.keys import MAILJET_API_KEY, MAILJET_API_SECRET, FROM_EMAIL

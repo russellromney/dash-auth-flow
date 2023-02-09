@@ -1,12 +1,6 @@
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html, dcc, Input, Output, State, no_update
 import dash_bootstrap_components as dbc
-from dash.dependencies import Output, Input, State
-from dash import no_update
-import random
-from flask_login import current_user
 import time
-from functools import wraps
 
 from server import app
 
