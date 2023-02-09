@@ -16,11 +16,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 # local imports
-from utilities.keys import (
-    MAILJET_API_KEY,
-    MAILJET_API_SECRET,
-    FROM_EMAIL
-)
+from utilities.keys import MAILJET_API_KEY, MAILJET_API_SECRET, FROM_EMAIL
 
 
 Column = sqlalchemy.Column
@@ -71,6 +67,7 @@ def show_users(engine):
 
     conn.close()
 
+
 def del_user(email, engine):
     table = user_table()
 
@@ -79,6 +76,7 @@ def del_user(email, engine):
     conn = engine.connect()
     conn.execute(delete)
     conn.close()
+
 
 def user_exists(email, engine):
     """
@@ -110,6 +108,7 @@ def change_password(email, password, engine):
     # success value
     return True
 
+
 def change_user(first, last, email, engine):
     # if there is no user in the database with that email, return False
     if not user_exists(email, engine):
@@ -117,7 +116,10 @@ def change_user(first, last, email, engine):
 
     # otherwise, that user exists; update that user's info
     table = user_table()
-    values = dict(first=first, last=last,)
+    values = dict(
+        first=first,
+        last=last,
+    )
     statement = table.update(table).where(table.c.email == email).values(values)
     with engine.connect() as conn:
         conn.execute(statement)
@@ -169,7 +171,12 @@ def send_password_key(email, firstname, engine):
             "Messages": [
                 {
                     "From": {"Email": FROM_EMAIL, "Name": "My App"},
-                    "To": [{"Email": email, "Name": first,}],
+                    "To": [
+                        {
+                            "Email": email,
+                            "Name": first,
+                        }
+                    ],
                     "Subject": "Greetings from Mailjet.",
                     "TextPart": "My App password reset code",
                     "HTMLPart": "<p>Dear {},<p> <p>Your My App password reset code is: <strong>{}</strong>".format(

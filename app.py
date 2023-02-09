@@ -15,7 +15,7 @@ from pages import (
     page1,
 )
 
-# app authentication 
+# app authentication
 from pages.auth_pages import (
     login,
     register,
@@ -31,103 +31,93 @@ header = dbc.Navbar(
                 [
                     dbc.NavItem(dbc.NavLink("Home", href="/home")),
                     dbc.NavItem(dbc.NavLink("Page1", href="/page1")),
-                    dbc.NavItem(dbc.NavLink(id='user-name',href='/profile')),
-                    dbc.NavItem(dbc.NavLink('Login',id='user-action',href='Login'))
+                    dbc.NavItem(dbc.NavLink(id="user-name", href="/profile")),
+                    dbc.NavItem(dbc.NavLink("Login", id="user-action", href="Login")),
                 ]
-            )
+            ),
         ]
     ),
     className="mb-5",
 )
 
 
-
 app.layout = html.Div(
     [
         header,
-        html.Div(
-            [
-                dbc.Container(
-                    id='page-content'
-                )
-            ]
-        ),
-        dcc.Location(id='base-url', refresh=True)
+        html.Div([dbc.Container(id="page-content")]),
+        dcc.Location(id="base-url", refresh=True),
     ]
 )
 
 
-@app.callback(
-    Output('page-content', 'children'),
-    [Input('base-url', 'pathname')])
+@app.callback(Output("page-content", "children"), [Input("base-url", "pathname")])
 def router(pathname):
-    '''
+    """
     routes to correct page based on pathname
-    '''
+    """
     # for debug
-    print('routing to',pathname)
-    
+    print("routing to", pathname)
+
     # auth pages
-    if pathname == '/login':
+    if pathname == "/login":
         if not current_user.is_authenticated:
             return login.layout()
-    elif pathname =='/register':
+    elif pathname == "/register":
         if not current_user.is_authenticated:
             return register.layout()
-    elif pathname == '/change':
+    elif pathname == "/change":
         if not current_user.is_authenticated:
             return change_password.layout()
-    elif pathname == '/forgot':
+    elif pathname == "/forgot":
         if not current_user.is_authenticated:
             return forgot_password.layout()
-    elif pathname == '/logout':
+    elif pathname == "/logout":
         if current_user.is_authenticated:
             logout_user()
-    
+
     # app pages
-    elif pathname == '/' or pathname=='/home' or pathname=='/home':
+    elif pathname == "/" or pathname == "/home" or pathname == "/home":
         if current_user.is_authenticated:
             return home.layout()
-    elif pathname == '/profile' or pathname=='/profile':
+    elif pathname == "/profile" or pathname == "/profile":
         if current_user.is_authenticated:
             return profile.layout()
-    elif pathname == '/page1' or pathname=='/page1':
+    elif pathname == "/page1" or pathname == "/page1":
         if current_user.is_authenticated:
             return page1.layout()
 
     # DEFAULT LOGGED IN: /home
     if current_user.is_authenticated:
         return home.layout()
-    
+
     # DEFAULT NOT LOGGED IN: /login
     return login.layout()
 
 
-@app.callback(
-    Output('user-name', 'children'),
-    [Input('page-content', 'children')])
+@app.callback(Output("user-name", "children"), [Input("page-content", "children")])
 def profile_link(content):
-    '''
+    """
     returns a navbar link to the user profile if the user is authenticated
-    '''
+    """
     if current_user.is_authenticated:
         return html.Div(current_user.first)
     else:
-        return ''
+        return ""
 
 
 @app.callback(
-    [Output('user-action', 'children'),
-     Output('user-action','href')],
-    [Input('page-content', 'children')])
+    [Output("user-action", "children"), Output("user-action", "href")],
+    [Input("page-content", "children")],
+)
 def user_logout(input1):
-    '''
+    """
     returns a navbar link to /logout or /login, respectively, if the user is authenticated or not
-    '''
+    """
     if current_user.is_authenticated:
-        return 'Logout', '/logout'
+        return "Logout", "/logout"
     else:
-        return 'Login', '/login'
+        return "Login", "/login"
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run_server(debug=True)
