@@ -51,7 +51,7 @@ def add_user(first, last, password, email, engine):
 
 def show_users(engine):
     table = user_table()
-    statement = select([table.c.first, table.c.last, table.c.email])
+    statement = select(table.c.first, table.c.last, table.c.email)
 
     conn = engine.connect()
     rs = conn.execute(statement)
@@ -150,7 +150,7 @@ def send_password_key(email, firstname, engine):
     key = "".join([random.choice("1234567890") for x in range(6)])
 
     table = user_table()
-    statement = select([table.c.first]).where(table.c.email == email)
+    statement = select(table.c.first).where(table.c.email == email)
     with engine.connect() as conn:
         resp = list(conn.execute(statement))
         if len(resp) == 0:
@@ -214,7 +214,7 @@ def validate_password_key(email, key, engine):
 
     # there is entry matching key and email
     table = password_change_table()
-    statement = select([table.c.email, table.c.password_key, table.c.timestamp]).where(
+    statement = select(table.c.email, table.c.password_key, table.c.timestamp).where(
         and_(table.c.email == email, table.c.password_key == key)
     )
     with engine.connect() as conn:

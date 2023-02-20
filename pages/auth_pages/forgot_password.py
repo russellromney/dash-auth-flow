@@ -55,7 +55,7 @@ def layout():
 def forgot_submit(submit, email):
     # get first name
     table = user_table()
-    statement = select([table.c.first]).where(table.c.email == email)
+    statement = select(table.c.first).where(table.c.email == email)
     conn = engine.connect()
     resp = list(conn.execute(statement))
     if len(resp) == 0:
