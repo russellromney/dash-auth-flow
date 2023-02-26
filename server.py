@@ -18,15 +18,15 @@ app = dash.Dash(
 
 server = app.server
 app.config.suppress_callback_exceptions = True
-#app.css.config.serve_locally = True
-#app.scripts.config.serve_locally = True
-app.title = 'Dash Auth Flow'
+# app.css.config.serve_locally = True
+# app.scripts.config.serve_locally = True
+app.title = "Dash Auth Flow"
 
 # config
 server.config.update(
-    SECRET_KEY='make this key random or hard to guess',
-    SQLALCHEMY_DATABASE_URI=config.get('database', 'con'),
-    SQLALCHEMY_TRACK_MODIFICATIONS=False
+    SECRET_KEY="make this key random or hard to guess",
+    SQLALCHEMY_DATABASE_URI=config.get("database", "con"),
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
 )
 
 db.init_app(server)
@@ -34,7 +34,7 @@ db.init_app(server)
 # Setup the LoginManager for the server
 login_manager = LoginManager()
 login_manager.init_app(server)
-login_manager.login_view = '/login'
+login_manager.login_view = "/login"
 
 
 # Create User class with UserMixin
