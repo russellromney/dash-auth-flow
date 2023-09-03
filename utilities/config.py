@@ -1,7 +1,15 @@
-import configparser
-from sqlalchemy import create_engine
+import sqlalchemy
+from sqlmodel import Session, create_engine
+from flask import current_app
+from dotenv import dotenv_values
 
-config = configparser.ConfigParser()
-config.read("config.txt")
+# Load a config dictionary from the dotenv file. 
+config = dotenv_values(".env")
 
-engine = create_engine(config.get("database", "con"))
+
+def make_engine() -> sqlalchemy.engine.Engine:
+    return create_engine(config["SQLALCHEMY_DATABASE_URI"])
+
+
+def get_session() -> Session:
+    return Session(current_app.engine)

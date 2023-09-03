@@ -1,38 +1,39 @@
-import dash_html_components as html
-import dash_core_components as dcc
 import dash_bootstrap_components as dbc
-from dash.dependencies import Output, Input, State
-from dash import no_update
-from flask_login import current_user
+from dash import Output, Input, State, dcc, html, no_update, register_page, callback
 import time
 
-from server import app
 
-home_login_alert = dbc.Alert("User not logged in. Taking you to login.", color="danger")
+register_page(__name__, path="/home")
 
 
 def layout():
     return dbc.Row(
         dbc.Col(
             [
-                dcc.Location(id="home-url", refresh=True),
-                html.Div(id="home-login-trigger", style=dict(display="none")),
                 html.H1("Home page"),
                 html.Br(),
                 html.H5("Welcome to the home page!"),
                 html.Br(),
+                html.P(
+                    "The section below is updated after a callback that takes 1 second!"
+                ),
                 html.Div(id="home-test-trigger"),
-                html.Div("before update", id="home-test"),
+                dcc.Loading(
+                    html.Div("before update", id="home-test"),
+                    id="loading-home-test-trigger",
+                    type="circle",
+                    style=dict(width="100%"),
+                ),
             ],
-            width=6,
+            width=10,
         )
     )
 
 
-@app.callback(Output("home-test", "children"), [Input("home-test-trigger", "children")])
+@callback(Output("home-test", "children"), Input("home-test-trigger", "children"))
 def home_test_update(trigger):
     """
     updates arbitrary value on home page for test
     """
-    time.sleep(2)
+    time.sleep(1)
     return html.Div("after the update", style=dict(color="red"))

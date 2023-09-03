@@ -1,41 +1,62 @@
-from utilities.config import engine
-from utilities.auth import (
-    User,
-    PasswordChange,
-    add_user,
-    change_user,
-    del_user,
-    show_users,
-    user_exists,
-)
+import uuid
+from logzero import logger
+from flask import current_app
+from sqlmodel import SQLModel, select
+from models.user import User
+
+from server import server
+from utilities.config import get_session
+from utilities.user import add_user, show_users
 
 
-# engine is open to sqlite///users.db
+def main():
+    """
+    Create all the tables in the current SQLModel metadata. 
+
+    Clear the tables. 
+    Re-create the test values.
+    """
+    # engine is open to sqlite///users.db (or whatever is in the .env files)
+    SQLModel.metadata.create_all(current_app.engine)
+
+    # add a test user to the database
+    users = [
+        dict(
+            first="test",
+            last="test",
+            email="test@test.com",
+            password="test",
+        )
+    ]
+    with get_session() as session:
+        # delete existing users
+        logger.info("DELETING USERS")
+        existing = session.exec(select(User)).all()
+        i = 0
+        for x in existing:
+            session.delete(x)
+            i += 1
+        session.commit()
+        logger.info(f"DELETED {i} USERS")
+
+        # add new users
+        logger.info("ADDING USERS")
+        i = 0
+        for vals in users:
+            add_user(**vals)
+            i += 1
+        session.commit()
+        logger.info(f"ADDED {i} USERS")
+
+    # show that the users exists
+    logger.info("USERS ARE:")
+    show_users()
+
+    # confirm that user exists
+    assert User.from_email(users[0]["email"])
+    logger.info(f"DONE")
 
 
-def create_user_table(model, engine):
-    model.metadata.create_all(engine)
-
-
-def create_password_change_table(model, engine):
-    model.metadata.create_all(engine)
-
-
-# create the tables
-create_user_table(User, engine)
-create_password_change_table(PasswordChange, engine)
-
-
-# add a test user to the database
-first = "test"
-last = "test"
-email = "test@test.com"
-password = "test"
-add_user(first, last, password, email, engine)
-
-
-# show that the users exists
-show_users(engine)
-
-# confirm that user exists
-print(user_exists(email, engine))
+if __name__ == "__main__":
+    with server.app_context():
+        main()

@@ -1,145 +1,97 @@
-# external imports
-import traceback
-from sqlalchemy import Table, create_engine, MetaData
-from sqlalchemy.sql import select, and_
-from flask_sqlalchemy import SQLAlchemy
-import sqlalchemy
-from werkzeug.security import generate_password_hash
+from typing import Callable
+from dash import dcc, page_registry
+from flask import current_app
 from flask_login import current_user
-from functools import wraps
+from logzero import logger
+import traceback
+from sqlmodel import select
 import random
 from mailjet_rest import Client
-import os
 from datetime import datetime, timedelta
-import shortuuid
-import dash_core_components as dcc
-import dash_html_components as html
 
-# local imports
-from utilities.keys import MAILJET_API_KEY, MAILJET_API_SECRET, FROM_EMAIL
-
-
-Column = sqlalchemy.Column
-String = sqlalchemy.String
-Integer = sqlalchemy.Integer
-DateTime = sqlalchemy.DateTime
-db = SQLAlchemy()
-Column, String, Integer, DateTime = db.Column, db.String, db.Integer, db.DateTime
+from models.password_change import PasswordChange
+from models.user import User
+from utilities.config import get_session, config
+from utilities.user import change_password
 
 
-class User(db.Model):
-    id = Column(Integer, primary_key=True)
-    first = Column(String(100))
-    last = Column(String(100))
-    email = Column(String(100), unique=True)
-    password = Column(String(100))
+def unprotected(f: Callable) -> Callable:
+    """Used in conjunction with Dash Pages and `protect_layouts`.
+    Decorates a Dash page layout function and explicitly
+    allows any user to access the layout function output.
 
-
-def user_table():
-    return Table("user", User.metadata)
-
-
-def add_user(first, last, password, email, engine):
-    table = user_table()
-    hashed_password = generate_password_hash(password, method="sha256")
-
-    values = dict(first=first, last=last, email=email, password=hashed_password)
-    statement = table.insert().values(**values)
-
-    try:
-        conn = engine.connect()
-        conn.execute(statement)
-        conn.close()
-        return True
-    except:
-        return False
-
-
-def show_users(engine):
-    table = user_table()
-    statement = select([table.c.first, table.c.last, table.c.email])
-
-    conn = engine.connect()
-    rs = conn.execute(statement)
-
-    for row in rs:
-        print(row)
-
-    conn.close()
-
-
-def del_user(email, engine):
-    table = user_table()
-
-    delete = table.delete().where(table.c.email == email)
-
-    conn = engine.connect()
-    conn.execute(delete)
-    conn.close()
-
-
-def user_exists(email, engine):
+    @unprotected
+    def layout():
+        return html.Div(...)
     """
-    checks if the user exists with email <email>
-    returns
-        True if user exists
-        False if user exists
+    f.is_protected = False
+    return f
+
+
+def protected(f: Callable) -> Callable:
+    """Used in conjunction with Dash Pages and `protect_layouts`.
+    Decorates a Dash page layout function and explicitly
+    requires a user to be authenticated to access the layout function output.
+
+    NOTE: Must be the first/outermost decorator.
+
+    @protected
+    @other_decorator
+    def layout():
+        return html.Div(...)
     """
-    table = user_table()
-    statement = table.select().where(table.c.email == email)
-    with engine.connect() as conn:
-        resp = conn.execute(statement)
-        ret = next(filter(lambda x: x.email == email, resp), False)
-    return bool(ret)
+    f.is_protected = True
+    return f
 
 
-def change_password(email, password, engine):
-    if not user_exists(email, engine):
-        return False
+def _protect_layout(f: Callable) -> Callable:
+    def wrapped(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return dcc.Location(
+                id="redirect-unauthenticated-user-to-login",
+                pathname=current_app.login_manager.login_view,
+            )
+        return f(*args, **kwargs)
 
-    table = user_table()
-    hashed_password = generate_password_hash(password, method="sha256")
-    values = dict(password=hashed_password)
-    statement = table.update(table).where(table.c.email == email).values(values)
-
-    with engine.connect() as conn:
-        conn.execute(statement)
-
-    # success value
-    return True
+    return wrapped
 
 
-def change_user(first, last, email, engine):
-    # if there is no user in the database with that email, return False
-    if not user_exists(email, engine):
-        return False
+def redirect_authenticated(pathname: str) -> Callable:
+    """
+    If the user is authenticated, redirect them to the provided page pathname.
+    """
 
-    # otherwise, that user exists; update that user's info
-    table = user_table()
-    values = dict(
-        first=first,
-        last=last,
-    )
-    statement = table.update(table).where(table.c.email == email).values(values)
-    with engine.connect() as conn:
-        conn.execute(statement)
-    # success value
-    return True
+    def wrapper(f: Callable):
+        def wrapped(*args, **kwargs):
+            if current_user.is_authenticated:
+                return dcc.Location(
+                    id="redirect-authenticated-user-to-path",
+                    pathname=pathname,
+                )
+            return f(*args, **kwargs)
 
+        return wrapped
 
-class PasswordChange(db.Model):
-    __tablename__ = "password_change"
-    id = Column(Integer, primary_key=True)
-    email = Column(String(100))
-    password_key = Column(String(6))
-    timestamp = Column(DateTime())
+    return wrapper
 
 
-def password_change_table():
-    return Table("password_change", PasswordChange.metadata)
+def protect_layouts(default: bool = True):
+    """
+    Call this after defining the global dash.Dash object.
+    Protect any explicitly protected views and *don't* protect any  explicitly unprotected views.
+    Otherwise, protect all or none according to the `default`.
+    """
+    for page in page_registry.values():
+        if hasattr(page["layout"], "is_protected"):
+            if bool(getattr(page["layout"], "is_protected")) == False:
+                continue
+            else:
+                page["layout"] = _protect_layout(page["layout"])
+        elif default == True:
+            page["layout"] = _protect_layout(page["layout"])
 
 
-def send_password_key(email, firstname, engine):
+def send_password_key(email, firstname):
     """
     ensure email exists
     create random 6-number password key
@@ -149,28 +101,24 @@ def send_password_key(email, firstname, engine):
     """
 
     # make sure email exists
-    if not user_exists(email, engine):
+    user = User.from_email(email)
+    if not user:
         return False
 
     # generate password key
     key = "".join([random.choice("1234567890") for x in range(6)])
 
-    table = user_table()
-    statement = select([table.c.first]).where(table.c.email == email)
-    with engine.connect() as conn:
-        resp = list(conn.execute(statement))
-        if len(resp) == 0:
-            return False
-        else:
-            first = resp[0].first
-
     # send password key via email
+    first = user.first
     try:
-        mailjet = Client(auth=(MAILJET_API_KEY, MAILJET_API_SECRET), version="v3.1")
+        mailjet = Client(
+            auth=(config.get("MAILJET_API_KEY"), config.get("MAILJET_API_SECRET")),
+            version="v3.1",
+        )
         data = {
             "Messages": [
                 {
-                    "From": {"Email": FROM_EMAIL, "Name": "My App"},
+                    "From": {"Email": config.get('FROM_EMAIL'), "Name": "My App"},
                     "To": [
                         {
                             "Email": email,
@@ -188,47 +136,41 @@ def send_password_key(email, firstname, engine):
         }
         result = mailjet.send.create(data=data)
         if result.status_code != "200":
-            print("status not 200")
+            logger.info("status not 200")
     except Exception as e:
         traceback.print_exc(e)
         return False
 
     # store that key in the password_key table
-    table = password_change_table()
-    values = dict(email=email, password_key=key, timestamp=datetime.now())
-    statement = table.insert().values(**values)
-    try:
-        with engine.connect() as conn:
-            conn.execute(statement)
-    except:
-        return False
+    with get_session() as session:
+        change = PasswordChange(email=email, password_key=key, timestamp=datetime.now())
+        session.add(change)
+        session.commit()
+        session.refresh(change)
 
     # change their current password to a random string
     # first, get first and last name
     random_password = "".join([random.choice("1234567890") for x in range(15)])
-    res = change_password(email, random_password, engine)
+    res = change_password(email, random_password)
     if res:
         # finished successfully
         return True
     return False
 
 
-def validate_password_key(email, key, engine):
+def validate_password_key(email: str, key: str) -> bool:
     # email exists
-    if not user_exists(email, engine):
+    if not User.from_email(email):
         return False
 
     # there is entry matching key and email
-    table = password_change_table()
-    statement = select([table.c.email, table.c.password_key, table.c.timestamp]).where(
-        and_(table.c.email == email, table.c.password_key == key)
-    )
-    with engine.connect() as conn:
-        resp = list(conn.execute(statement))
-        if len(resp) == 1:
-            if (resp[0].timestamp - (datetime.now() - timedelta(1))).days < 1:
-                return True
-        return False
-
-    # finished with no erros; return True
-    return True
+    with get_session() as session:
+        out = session.exec(
+            select(PasswordChange)
+            .where(PasswordChange.email == email)
+            .where(PasswordChange.password_key == key)
+        ).all()
+    if out:
+        if (out[0].timestamp - (datetime.now() - timedelta(1))).days < 1:
+            return True
+    return False

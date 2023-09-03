@@ -1,19 +1,11 @@
-import dash_html_components as html
-import dash_core_components as dcc
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
-from dash import no_update
+from dash import Input, Output, State, html, dcc, no_update, callback, register_page
+from flask_login import current_user
+from models.user import User
 
-from flask_login import login_user, current_user
-from werkzeug.security import check_password_hash
-import time
-from sqlalchemy.sql import select
+from utilities.auth import redirect_authenticated, send_password_key, unprotected
 
-from server import app, User, engine
-from utilities.auth import (
-    send_password_key,
-    user_table,
-)
+register_page(__name__, path="/forgot")
 
 success_alert = dbc.Alert(
     "Reset successful. Taking you to change password.",
@@ -23,31 +15,29 @@ failure_alert = dbc.Alert(
     "Reset unsuccessful. Are you sure that email was correct?",
     color="danger",
 )
-already_login_alert = dbc.Alert(
-    "User already logged in. Taking you to your profile.", color="warning"
-)
 
-
+@unprotected
+@redirect_authenticated("/home")
 def layout():
     return dbc.Row(
         dbc.Col(
             [
                 html.H3("Forgot Password"),
-                dcc.Location(id="forgot-url", refresh=True),
-                dbc.FormGroup(
-                    [
-                        html.Div(id="forgot-alert"),
-                        html.Div(id="forgot-trigger", style=dict(display="none")),
-                        html.Br(),
-                        dbc.Input(id="forgot-email", autoFocus=True),
-                        dbc.FormText("Email"),
-                        html.Br(),
-                        dbc.Button(
-                            "Submit email to receive code",
-                            id="forgot-button",
-                            color="primary",
-                        ),
-                    ]
+                dbc.Row(
+                    dbc.Col(
+                        [
+                            html.Div(id="forgot-alert"),
+                            html.Br(),
+                            dbc.Input(id="forgot-email", autoFocus=True),
+                            dbc.FormText("Email"),
+                            html.Br(),
+                            dbc.Button(
+                                "Submit email to receive code",
+                                id="forgot-button",
+                                color="primary",
+                            ),
+                        ]
+                    )
                 ),
             ],
             width=6,
@@ -55,25 +45,20 @@ def layout():
     )
 
 
-@app.callback(
-    [Output("forgot-alert", "children"), Output("forgot-url", "pathname")],
-    [Input("forgot-button", "n_clicks")],
-    [State("forgot-email", "value")],
+@callback(
+    Output("forgot-alert", "children"),
+    Output("forgot-url", "pathname"),
+    Input("forgot-button", "n_clicks"),
+    State("forgot-email", "value"),
 )
 def forgot_submit(submit, email):
     # get first name
-    table = user_table()
-    statement = select([table.c.first]).where(table.c.email == email)
-    conn = engine.connect()
-    resp = list(conn.execute(statement))
-    if len(resp) == 0:
+    user = User.from_email(email)
+    if not user:
         return failure_alert, no_update
-    else:
-        firstname = resp[0].first
-    conn.close()
 
     # if it does, send password reset and save info
-    if send_password_key(email, firstname, engine):
+    if send_password_key(email, user.first):
         return success_alert, "/change"
     else:
         return failure_alert, no_update
