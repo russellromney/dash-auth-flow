@@ -8,24 +8,34 @@ from utils.config import config
 header = dbc.Navbar(
     dbc.Container(
         [
-            dbc.NavbarBrand("Dash Auth Flow", href=config["HOME_PATH"]),
+            dbc.NavbarBrand(
+                [
+                    html.Img(src="/assets/favicon.ico", height="30px"),
+                    html.Span("Dash Auth Flow", style=dict(marginLeft="10px")),
+                ],
+                href=config["HOME_PATH"],
+                style=dict(maxWidth="300px"),
+            ),
             dbc.Nav(
                 [
                     dbc.NavItem(dbc.NavLink("Home", href=config["HOME_PATH"])),
                     dbc.NavItem(dbc.NavLink("Page", href="/page")),
                     dbc.NavItem(dbc.NavLink(id="user-name-nav", href="/profile")),
                     dbc.NavItem(dbc.NavLink("Login", id="user-action", href="/login")),
-                ]
+                ],
             ),
-        ]
+        ],
     ),
-    className="mb-5",
+    # className="mb-5",
+    color="dark",
+    dark=True,
 )
 
 
 app.layout = html.Div(
     [
         header,
+        html.Br(),
         dbc.Container(dash.page_container),
         dcc.Location(id="url", refresh=True),
         html.Div(id="profile-trigger", style=dict(display="none")),

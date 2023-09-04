@@ -21,12 +21,12 @@ def layout():
                 dbc.Row(
                     dbc.Col(
                         [
-                            html.Div(id="login-alert"),
                             dbc.Alert(
                                 "Try test@test.com / test",
                                 color="info",
                                 dismissable=True,
                             ),
+                            html.Div(id="login-alert"),
                             html.Br(),
                             dbc.FormText("Email"),
                             dbc.Input(id="login-email", autoFocus=True),
