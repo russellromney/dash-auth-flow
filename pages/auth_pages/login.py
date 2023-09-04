@@ -62,7 +62,7 @@ def layout():
     )
 
 
-success_alert = dbc.Alert("Logged in. Taking you to home.", color="success")
+success_alert = dbc.Alert("Success! Taking you home", color="success")
 failure_alert = dbc.Alert(
     "Login failed. Check your email and password.",
     color="danger",
