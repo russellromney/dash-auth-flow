@@ -16,8 +16,7 @@ def create_app():
     app = dash.Dash(
         __name__,
         server=server,
-        external_stylesheets=[dbc.themes.BOOTSTRAP],
-        # prevent_initial_callbacks=True,
+        external_stylesheets=[dbc.themes.LITERA],
         use_pages=True,
         suppress_callback_exceptions=True,
         title="Dash Auth Flow",
