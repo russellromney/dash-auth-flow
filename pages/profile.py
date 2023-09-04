@@ -1,158 +1,137 @@
-import dash_html_components as html
-import dash_core_components as dcc
-import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
-from dash import no_update
-
-from flask_login import login_user, current_user
-from werkzeug.security import check_password_hash
 import time
+import dash_bootstrap_components as dbc
+from dash import Input, Output, State, html, dcc, no_update, register_page, callback
+from flask_login import current_user
+from utils.config import get_session
+from utils.user import change_password, User
 
-from server import app, User, engine
-from utilities.auth import change_user, change_password
-
-
-success_alert = dbc.Alert(
-    "Changes saved successfully.",
-    color="success",
-)
-failure_alert = dbc.Alert(
-    "Unable to save changes.",
-    color="danger",
-)
-login_alert = dbc.Alert(
-    "User not logged in. Taking you to login.",
-    color="warning",
-)
+register_page(__name__, path="/profile")
 
 
 def layout():
     return dbc.Row(
         dbc.Col(
             [
-                dcc.Location(
-                    id="profile-url",
-                    refresh=True,
-                ),
-                html.Div(1, id="profile-trigger", style=dict(display="none")),
                 html.H3("Profile", id="profile-title"),
                 html.Div(id="profile-alert"),
                 html.Div(id="profile-alert-login"),
                 html.Div(id="profile-login-trigger", style=dict(display="none")),
-                html.Br(),
-                dbc.FormGroup(
-                    [
-                        # First, first input, and formtext
-                        dbc.Label("First:", id="profile-first"),
-                        dbc.Input(
-                            placeholder="Change first name...", id="profile-first-input"
-                        ),
-                        dbc.FormText(id="profile-first-formtext", color="secondary"),
-                        html.Br(),
-                        # last, last input, and formtext
-                        dbc.Label("Last:", id="profile-last"),
-                        dbc.Input(
-                            placeholder="Change last name...", id="profile-last-input"
-                        ),
-                        dbc.FormText(id="profile-last-formtext", color="secondary"),
-                        html.Br(),
-                        # email, formtext
-                        dbc.Label("Email:", id="profile-email"),
-                        dbc.FormText("Cannot change email", color="secondary"),
-                        html.Br(),
-                        html.Hr(),
-                        html.Br(),
-                        # password, input, confirm input
-                        dbc.Label("Change password", id="profile-password"),
-                        dbc.Input(
-                            placeholder="Change password...",
-                            id="profile-password-input",
-                            type="password",
-                        ),
-                        dbc.FormText(
-                            "Change password",
-                            color="secondary",
-                            id="profile-password-input-formtext",
-                        ),
-                        html.Br(),
-                        dbc.Input(
-                            placeholder="Confirm password...",
-                            id="profile-password-confirm",
-                            type="password",
-                        ),
-                        dbc.FormText(
-                            "Confirm password",
-                            color="secondary",
-                            id="profile-password-confirm-formtext",
-                        ),
-                        html.Br(),
-                        html.Hr(),
-                        html.Br(),
-                        dbc.Button(
-                            "Save changes",
-                            color="primary",
-                            id="profile-submit",
-                            disabled=True,
-                        ),
-                    ]  # end formgroup
+                dcc.Loading(
+                    html.Div(id="loading-profile-trigger"),
+                    id="loading-profile",
                 ),
-            ],  # end col
-            width=6,
+                html.Br(),
+                dbc.Row(
+                    dbc.Col(
+                        [
+                            dbc.Label("First:", id="profile-first"),
+                            dbc.Input(
+                                placeholder="Change first name...",
+                                id="profile-first-input",
+                            ),
+                            dbc.FormText(
+                                id="profile-first-formtext", color="secondary"
+                            ),
+                            html.Br(),
+                            #
+                            #
+                            dbc.Label("Last:", id="profile-last"),
+                            dbc.Input(
+                                placeholder="Change last name...",
+                                id="profile-last-input",
+                            ),
+                            dbc.FormText(id="profile-last-formtext", color="secondary"),
+                            html.Hr(),
+                            #
+                            #
+                            dbc.Label("Email:", id="profile-email"),
+                            html.Br(),
+                            dbc.FormText("Cannot change email", color="secondary"),
+                            html.Hr(),
+                            #
+                            #
+                            dbc.Label("New password", id="profile-password"),
+                            dbc.Input(
+                                placeholder="Change password...",
+                                id="profile-password-input",
+                                type="password",
+                            ),
+                            html.Br(),
+                            dbc.Label("Confirm new password", id="profile-password"),
+                            dbc.Input(
+                                placeholder="Confirm password...",
+                                id="profile-password-confirm",
+                                type="password",
+                            ),
+                            html.Hr(),
+                            #
+                            #
+                            dbc.Button(
+                                "Save changes",
+                                color="primary",
+                                id="profile-submit",
+                                disabled=True,
+                            ),
+                        ]
+                    )
+                ),
+            ],
+            className="auth-page",
         )
     )
 
 
-# function to show profile values
-@app.callback(
-    [
-        Output("profile-alert-login", "children"),
-        Output("profile-login-trigger", "children"),
-    ]
-    + [Output("profile-" + x, "children") for x in ["first", "last", "email"]]
-    + [Output("profile-{}-input".format(x), "value") for x in ["first", "last"]],
-    [Input("profile-trigger", "children")],
+success_alert = dbc.Alert(
+    "Changes saved successfully.", color="success", dismissable=True, duration=3000
 )
-def profile_values(trigger):
-    """
-    triggered by loading the change or saving new values
+failure_alert = dbc.Alert(
+    "Unable to save changes.", color="danger", dismissable=True, duration=3000
+)
 
-    loads values from user to database
-    user must be logged in
+
+@callback(
+    Output("loading-profile-trigger", "children"),
+    Output("profile-first", "children"),
+    Output("profile-last", "children"),
+    Output("profile-email", "children"),
+    Output("profile-first-input", "value"),
+    Output("profile-last-input", "value"),
+    Input("profile-trigger", "children"),
+    Input("profile-login-trigger", "children"),
+)
+def profile_values(_, __):
+    """Triggered by loading the page or saving new values.
+    Loads values for user from database.
     """
-    if not trigger:
-        return no_update, no_update, "First: ", "Last: ", "Email:", "", ""
     if current_user.is_authenticated:
+        time.sleep(1)
         return (
-            no_update,
-            no_update,
+            "",
             ["First: ", html.Strong(current_user.first)],
             ["Last: ", html.Strong(current_user.last)],
             ["Email: ", html.Strong(current_user.email)],
             current_user.first,
             current_user.last,
         )
-    return login_alert, "/login", "First: ", "Last: ", "Email:", "", ""
+    return "", "First: ", "Last: ", "Email:", "", "", ""
 
 
 # function to validate changes input
-@app.callback(
-    [
-        Output("profile-" + x, "valid")
-        for x in ["first-input", "last-input", "password-input", "password-confirm"]
-    ]
-    + [
-        Output("profile-" + x, "invalid")
-        for x in ["first-input", "last-input", "password-input", "password-confirm"]
-    ]
-    + [
-        Output("profile-" + x, "color")
-        for x in ["password-input-formtext", "password-confirm-formtext"]
-    ]
-    + [Output("profile-submit", "disabled")],
-    [
-        Input("profile-" + x, "value")
-        for x in ["first-input", "last-input", "password-input", "password-confirm"]
-    ],
+@callback(
+    Output("profile-first-input", "valid"),
+    Output("profile-last-input", "valid"),
+    Output("profile-password-input", "valid"),
+    Output("profile-password-confirm", "valid"),
+    Output("profile-first-input", "invalid"),
+    Output("profile-last-input", "invalid"),
+    Output("profile-password-input", "invalid"),
+    Output("profile-password-confirm", "invalid"),
+    Output("profile-submit", "disabled"),
+    Input("profile-first-input", "value"),
+    Input("profile-last-input", "value"),
+    Input("profile-password-input", "value"),
+    Input("profile-password-confirm", "value"),
+    prevent_initial_call=True,
 )
 def profile_validate(first, last, password, confirm):
     disabled = True
@@ -160,12 +139,9 @@ def profile_validate(first, last, password, confirm):
     values = [first, last, password, confirm]
     valids = [False for x in range(4)]
     invalids = [False for x in range(4)]
-    colors = ["secondary", "secondary"]
-
     # if all are invalid
     if sum([x in bad for x in values]) == 4:
-        return valids + invalids + colors + [disabled]
-
+        return valids + invalids + [disabled]
     # first name
     i = 0
     if first in bad:
@@ -175,8 +151,6 @@ def profile_validate(first, last, password, confirm):
             valids[i] = True
         else:
             invalids[i] = True
-            colors[0] = "danger"
-
     # last name
     i = 1
     if last in bad:
@@ -186,8 +160,7 @@ def profile_validate(first, last, password, confirm):
             valids[i] = True
         else:
             invalids[i] = True
-            colors[1] = "danger"
-
+    # password
     i = 2
     if password in bad:
         pass
@@ -201,7 +174,6 @@ def profile_validate(first, last, password, confirm):
                 invalids[i] = True
         else:
             invalids[i] = True
-
     # if all inputs are either valid or empty, enable the button
     if (
         sum(
@@ -215,31 +187,45 @@ def profile_validate(first, last, password, confirm):
         == 4
     ):
         disabled = False
-
-    return valids + invalids + colors + [disabled]
+    return valids + invalids + [disabled]
 
 
 # function to save changes
-@app.callback(
-    [Output("profile-alert", "children"), Output("profile-trigger", "children")],
-    [Input("profile-submit", "n_clicks")],
-    [
-        State("profile-{}-input".format(x), "value")
-        for x in ["first", "last", "password"]
-    ],
+@callback(
+    Output("profile-alert", "children"),
+    Output("profile-trigger", "children"),
+    Input("profile-submit", "n_clicks"),
+    State("profile-first-input", "value"),
+    State("profile-last-input", "value"),
+    State("profile-password-input", "value"),
+    prevent_initial_call=True,
 )
 def profile_save_changes(n_clicks, first, last, password):
     """
-    change profile values to values in inputs
+    Change profile values to values in inputs.
 
-    if password is blank, pull the current password and submit it
-    assumes all inputs are valid and checked by validator callback before submitting (enforced by disabling button otherwise)
+    If password is blank, pull the current password and submit it.
+
+    Assumes all inputs are valid and checked by validator callback
+    before submitting (enforced by disabling button otherwise)
     """
+    if not n_clicks:
+        return no_update, no_update
+
     email = current_user.email
 
-    if change_user(first, last, email, engine):
-        if password not in ["", None]:
-            change_password(email, password, engine)
-        return success_alert, 1
+    user = User.from_email(email)
+    if not user:
+        return failure_alert, 0
+    user.first = first
+    user.last = last
+    user.email = email
+    with get_session() as session:
+        session.add(user)
+        session.commit()
+        session.refresh(user)
 
-    return failure_alert, 0
+    if password not in ["", None]:
+        change_password(user.email, password)
+
+    return success_alert, 1

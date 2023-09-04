@@ -1,19 +1,53 @@
-import dash_html_components as html
-import dash_core_components as dcc
-import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
-from dash import no_update
-
-from flask_login import login_user, current_user
-from werkzeug.security import check_password_hash
 import time
-from sqlalchemy.sql import select
+import uuid
+import dash_bootstrap_components as dbc
+from dash import Input, Output, State, html, dcc, no_update, callback, register_page
+from models.user import User
 
-from server import app, User, engine
-from utilities.auth import (
-    send_password_key,
-    user_table,
-)
+from utils.auth import redirect_authenticated, unprotected
+from utils.pw import send_password_key
+from utils.config import config
+
+register_page(__name__, path="/forgot")
+
+
+@unprotected
+@redirect_authenticated(config["HOME_PATH"])
+def layout():
+    return dbc.Row(
+        dbc.Col(
+            [
+                html.H3("Forgot Password"),
+                dbc.Row(
+                    dbc.Col(
+                        [
+                            html.Div(id="forgot-alert"),
+                            html.Br(),
+                            dbc.FormText("Email"),
+                            dbc.Input(id="forgot-email", autoFocus=True),
+                            html.Br(),
+                            dcc.Loading(
+                                [
+                                    html.Div(
+                                        id="forgot-trigger", style=dict(display="none")
+                                    ),
+                                    html.Div(id="forgot-redirect"),
+                                ],
+                                id=uuid.uuid4().hex,
+                            ),
+                            dbc.Button(
+                                "Submit email to receive code",
+                                id="forgot-button",
+                                color="primary",
+                            ),
+                        ]
+                    )
+                ),
+            ],
+            className="auth-page",
+        )
+    )
+
 
 success_alert = dbc.Alert(
     "Reset successful. Taking you to change password.",
@@ -22,58 +56,39 @@ success_alert = dbc.Alert(
 failure_alert = dbc.Alert(
     "Reset unsuccessful. Are you sure that email was correct?",
     color="danger",
+    dismissable=True,
+    duration=3000,
 )
-already_login_alert = dbc.Alert(
-    "User already logged in. Taking you to your profile.", color="warning"
+
+
+@callback(
+    Output("forgot-alert", "children"),
+    Output("forgot-trigger", "children"),
+    Input("forgot-button", "n_clicks"),
+    State("forgot-email", "value"),
+    prevent_initial_call=True,
 )
-
-
-def layout():
-    return dbc.Row(
-        dbc.Col(
-            [
-                html.H3("Forgot Password"),
-                dcc.Location(id="forgot-url", refresh=True),
-                dbc.FormGroup(
-                    [
-                        html.Div(id="forgot-alert"),
-                        html.Div(id="forgot-trigger", style=dict(display="none")),
-                        html.Br(),
-                        dbc.Input(id="forgot-email", autoFocus=True),
-                        dbc.FormText("Email"),
-                        html.Br(),
-                        dbc.Button(
-                            "Submit email to receive code",
-                            id="forgot-button",
-                            color="primary",
-                        ),
-                    ]
-                ),
-            ],
-            width=6,
-        )
-    )
-
-
-@app.callback(
-    [Output("forgot-alert", "children"), Output("forgot-url", "pathname")],
-    [Input("forgot-button", "n_clicks")],
-    [State("forgot-email", "value")],
-)
-def forgot_submit(submit, email):
+def forgot_submit(_, email):
     # get first name
-    table = user_table()
-    statement = select([table.c.first]).where(table.c.email == email)
-    conn = engine.connect()
-    resp = list(conn.execute(statement))
-    if len(resp) == 0:
+    user = User.from_email(email)
+    if not user:
         return failure_alert, no_update
-    else:
-        firstname = resp[0].first
-    conn.close()
 
     # if it does, send password reset and save info
-    if send_password_key(email, firstname, engine):
-        return success_alert, "/change"
+    if send_password_key(email, user.first):
+        return success_alert, 1
     else:
         return failure_alert, no_update
+
+
+@callback(
+    Output("url", "pathname", allow_duplicate=True),
+    Output("forgot-redirect", "children"),
+    Input("forgot-trigger", "children"),
+    prevent_initial_call=True,
+)
+def forgot_redirect(trigger):
+    if trigger:
+        time.sleep(2)
+        return "/change", ""
+    return no_update, no_update

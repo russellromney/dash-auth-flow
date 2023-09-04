@@ -1,0 +1,18 @@
+.page-content {
+  max-width: 800px;
+  margin: auto;
+}
+
+.auth-page {
+    max-width: 500px;
+    margin: auto;
+}
+
+._dash-loading {
+    margin: auto;
+    color: transparent;
+    width: 2rem;
+    height: 2rem;
+    text-align: center;
+  }
+  

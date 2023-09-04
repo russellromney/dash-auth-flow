@@ -1,0 +1,5 @@
+fly.toml
+venv
+.git
+example.gif
+# ... whatever else you want

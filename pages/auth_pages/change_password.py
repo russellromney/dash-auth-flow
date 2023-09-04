@@ -1,20 +1,63 @@
-import dash_html_components as html
-import dash_core_components as dcc
-import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
-from dash import no_update
-
-from flask_login import login_user, current_user
-from werkzeug.security import check_password_hash
-from sqlalchemy.sql import select
-
-from server import app, User, engine
-from utilities.auth import (
-    validate_password_key,
-    change_password,
-)
-
 import time
+import uuid
+import dash_bootstrap_components as dbc
+from dash import Input, Output, State, html, dcc, no_update, callback, register_page
+from validate_email import validate_email
+
+from utils.auth import redirect_authenticated, unprotected
+from utils.pw import validate_password_key, change_password
+from utils.user import change_password
+from utils.config import config
+
+register_page(__name__, path="/change")
+
+
+@unprotected
+@redirect_authenticated(config["HOME_PATH"])
+def layout():
+    return dbc.Row(
+        dbc.Col(
+            [
+                html.H3("Change Password"),
+                dbc.Row(
+                    dbc.Col(
+                        [
+                            html.Div(id="change-alert"),
+                            dcc.Loading(
+                                [
+                                    html.Div(
+                                        id="change-trigger", style=dict(display="none")
+                                    ),
+                                    html.Div(id="change-redirect"),
+                                ],
+                                id=uuid.uuid4().hex,
+                            ),
+                            html.Br(),
+                            dbc.FormText("Email"),
+                            dbc.Input(id="change-email", autoFocus=True),
+                            html.Br(),
+                            dbc.FormText("Code"),
+                            dbc.Input(id="change-key", type="password"),
+                            html.Br(),
+                            dbc.FormText("New password"),
+                            dbc.Input(id="change-password", type="password"),
+                            html.Br(),
+                            dbc.FormText("Confirm new password"),
+                            dbc.Input(id="change-confirm", type="password"),
+                            html.Br(),
+                            dbc.Button(
+                                "Submit password change",
+                                id="change-button",
+                                color="primary",
+                            ),
+                        ]
+                    )
+                ),
+            ],
+            className="auth-page",
+        )
+    )
+
 
 success_alert = dbc.Alert(
     "Reset successful. Taking you to login!",
@@ -23,105 +66,80 @@ success_alert = dbc.Alert(
 failure_alert = dbc.Alert(
     "Reset unsuccessful. Are you sure the email and code were correct?",
     color="danger",
+    dismissable=True,
+    duration=3000,
 )
-already_login_alert = dbc.Alert(
-    "User already logged in. Taking you to your profile.", color="warning"
-)
-
-
-def layout():
-    return dbc.Row(
-        dbc.Col(
-            [
-                html.H3("Change Password"),
-                dcc.Location(id="change-url", refresh=True),
-                html.Div(id="change-trigger", style=dict(display="none")),
-                dbc.FormGroup(
-                    [
-                        html.Div(id="change-alert"),
-                        html.Br(),
-                        dbc.Input(id="change-email", autoFocus=True),
-                        dbc.FormText("Email"),
-                        html.Br(),
-                        dbc.Input(id="change-key", type="password"),
-                        dbc.FormText("Code"),
-                        html.Br(),
-                        dbc.Input(id="change-password", type="password"),
-                        dbc.FormText("New password"),
-                        html.Br(),
-                        dbc.Input(id="change-confirm", type="password"),
-                        dbc.FormText("Confirm new password"),
-                        html.Br(),
-                        dbc.Button(
-                            "Submit password change",
-                            id="change-button",
-                            color="primary",
-                        ),
-                    ]
-                ),
-            ],
-            width=6,
-        )
-    )
 
 
 # function to validate inputs
-@app.callback(
-    [
-        Output("change-password", "valid"),
-        Output("change-password", "invalid"),
-        Output("change-confirm", "valid"),
-        Output("change-confirm", "invalid"),
-        Output("change-button", "disabled"),
-    ],
-    [Input("change-password", "value"), Input("change-confirm", "value")],
+@callback(
+    Output("change-password", "valid"),
+    Output("change-password", "invalid"),
+    Output("change-confirm", "valid"),
+    Output("change-confirm", "invalid"),
+    Output("change-email", "valid"),
+    Output("change-email", "invalid"),
+    Output("change-button", "disabled"),
+    Input("change-password", "value"),
+    Input("change-confirm", "value"),
+    Input("change-email", "value"),
+    prevent_initial_call=True,
 )
-def change_validate_inputs(password, confirm):
+def change_validate_inputs(password, confirm, email):
     password_valid = False
     password_invalid = False
     confirm_valid = False
     confirm_invalid = True
+    email_valid = False
+    email_invalid = True
     disabled = True
-
     bad = [None, ""]
-
-    if password in bad:
-        pass
-    elif isinstance(password, str):
-        password_valid = True
-        password_invalid = False
-
-    if confirm in bad:
-        pass
-    elif confirm == password:
-        confirm_valid = True
-        confirm_invalid = False
-
-    if password_valid and confirm_valid:
+    if password not in bad and isinstance(password, str):
+        password_valid, password_invalid = True, False
+    if confirm not in bad and confirm == password:
+        confirm_valid, confirm_invalid = True, False
+    if email not in bad and validate_email(email):
+        email_valid, email_invalid = True, False
+    if password_valid and confirm_valid and email_valid:
         disabled = False
+    return (
+        password_valid,
+        password_invalid,
+        confirm_valid,
+        confirm_invalid,
+        email_valid,
+        email_invalid,
+        disabled,
+    )
 
-    return (password_valid, password_invalid, confirm_valid, confirm_invalid, disabled)
 
-
-@app.callback(
-    [Output("change-alert", "children"), Output("change-url", "pathname")],
-    [Input("change-button", "n_clicks")],
-    [
-        State("change-email", "value"),
-        State("change-key", "value"),
-        State("change-password", "value"),
-        State("change-confirm", "value"),
-    ],
+@callback(
+    Output("change-alert", "children"),
+    Output("change-trigger", "pathname"),
+    Input("change-button", "n_clicks"),
+    State("change-email", "value"),
+    State("change-key", "value"),
+    State("change-password", "value"),
+    State("change-confirm", "value"),
+    prevent_initial_call=True,
 )
 def submit_change(submit, email, key, password, confirm):
     # all inputs have been previously validated
-    # validate_password_key(email,key,engine)
-    if validate_password_key(email, key, engine):
+    if validate_password_key(email, key):
         # if that returns true, update the user information
-        if change_password(email, password, engine):
-            return success_alert, "/login"
-        else:
-            pass
-    else:
-        pass
+        if change_password(email, password):
+            return success_alert, 1
     return failure_alert, no_update
+
+
+@callback(
+    Output("url", "pathname", allow_duplicate=True),
+    Output("change-redirect", "children"),
+    Input("change-trigger", "children"),
+    prevent_initial_call=True,
+)
+def change_redirect(trigger):
+    if trigger:
+        time.sleep(2)
+        return "/forgot", ""
+    return no_update, no_update
