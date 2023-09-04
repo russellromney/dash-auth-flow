@@ -1,9 +1,10 @@
 import dash_bootstrap_components as dbc
 from dash import Output, Input, State, dcc, html, no_update, register_page, callback
 import time
+from utils.config import config
 
 
-register_page(__name__, path="/")
+register_page(__name__, path=config["HOME_PATH"])
 
 
 def layout():

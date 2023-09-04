@@ -4,8 +4,8 @@ from flask import current_app
 from sqlmodel import SQLModel, select
 
 from application import server
-from utilities.config import get_session
-from utilities.user import add_user, show_users
+from utils.config import get_session
+from utils.user import add_user, show_users
 from models.user import User
 from models.password_change import PasswordChange
 

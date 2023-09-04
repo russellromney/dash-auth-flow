@@ -6,8 +6,9 @@ import time
 from validate_email import validate_email
 from models.user import User
 
-from utilities.auth import redirect_authenticated, unprotected
-from utilities.user import add_user
+from utils.auth import redirect_authenticated, unprotected
+from utils.user import add_user
+from utils.config import config
 
 register_page(__name__, path="/register")
 
@@ -23,7 +24,7 @@ failure_alert = dbc.Alert(
 
 
 @unprotected
-@redirect_authenticated("/")
+@redirect_authenticated(config["HOME_PATH"])
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -181,6 +182,7 @@ def register_success(n_clicks, first, last, email, password, confirm):
 
 
 @callback(
+    Output("url", "pathname", allow_duplicate=True),
     Output("register-redirect", "children"),
     Input("register-trigger", "children"),
     prevent_initial_call=True,
@@ -189,5 +191,5 @@ def register_redirect(trigger):
     if trigger:
         if trigger == 1:
             time.sleep(1.5)
-            return dcc.Location(id="redirect-register-to-home", pathname="/")
-    return no_update
+            return "/login", ""
+    return no_update, no_update

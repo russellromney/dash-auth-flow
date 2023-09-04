@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, Field, select
 import sqlalchemy
 import uuid
 
-from utilities.config import get_session
+from utils.config import get_session
 
 
 class AuthUser(UserMixin):

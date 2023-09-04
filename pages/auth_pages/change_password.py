@@ -4,12 +4,10 @@ import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, dcc, no_update, callback, register_page
 from validate_email import validate_email
 
-from utilities.auth import (
-    redirect_authenticated,
-    unprotected,
-    validate_password_key,
-    change_password,
-)
+from utils.auth import redirect_authenticated, unprotected
+from utils.pw import validate_password_key, change_password
+from utils.user import change_password
+from utils.config import config
 
 register_page(__name__, path="/change")
 
@@ -26,7 +24,7 @@ failure_alert = dbc.Alert(
 
 
 @unprotected
-@redirect_authenticated("/")
+@redirect_authenticated(config["HOME_PATH"])
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -135,12 +133,12 @@ def submit_change(submit, email, key, password, confirm):
 
 @callback(
     Output("url", "pathname", allow_duplicate=True),
+    Output("change-redirect", "children"),
     Input("change-trigger", "children"),
     prevent_initial_call=True,
 )
 def change_redirect(trigger):
     if trigger:
         time.sleep(2)
-        return "/forgot"
-        return dcc.Location(id="redirect-change-to-forgot", pathname="/forgot")
-    return no_update
+        return "/forgot", ""
+    return no_update, no_update

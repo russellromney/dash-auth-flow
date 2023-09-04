@@ -3,15 +3,15 @@ from dash import Input, Output, State, html, dcc, register_page, callback
 import dash
 from application import app, server
 from flask_login import current_user
-
+from utils.config import config
 
 header = dbc.Navbar(
     dbc.Container(
         [
-            dbc.NavbarBrand("Dash Auth Flow", href="/"),
+            dbc.NavbarBrand("Dash Auth Flow", href=config["HOME_PATH"]),
             dbc.Nav(
                 [
-                    dbc.NavItem(dbc.NavLink("Home", href="/")),
+                    dbc.NavItem(dbc.NavLink("Home", href=config["HOME_PATH"])),
                     dbc.NavItem(dbc.NavLink("Page", href="/page")),
                     dbc.NavItem(dbc.NavLink(id="user-name-nav", href="/profile")),
                     dbc.NavItem(dbc.NavLink("Login", id="user-action", href="/login")),

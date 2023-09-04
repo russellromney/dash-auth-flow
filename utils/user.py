@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash
 from sqlmodel import select
 
 from models.user import User
-from utilities.config import get_session
+from utils.config import get_session
 
 
 def add_user(first: str, last: str, password: str, email: str) -> bool:

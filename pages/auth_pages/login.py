@@ -6,7 +6,8 @@ from flask_login import current_user, login_user
 from werkzeug.security import check_password_hash
 
 from models.user import User
-from utilities.auth import redirect_authenticated, unprotected
+from utils.auth import redirect_authenticated, unprotected
+from utils.config import config
 
 register_page(__name__, path="/login")
 
@@ -20,7 +21,7 @@ failure_alert = dbc.Alert(
 
 
 @unprotected
-@redirect_authenticated("/")
+@redirect_authenticated(config["HOME_PATH"])
 def layout():
     return dbc.Row(
         dbc.Col(
@@ -99,6 +100,5 @@ def login_success(n_clicks, password, email):
 def login_redirect(trigger):
     if trigger:
         time.sleep(2)
-        return "", "/"
-        return dcc.Location(id="redirect-login-to-home", pathname="/")
-    return no_update
+        return "", config["HOME_PATH"]
+    return no_update, no_update

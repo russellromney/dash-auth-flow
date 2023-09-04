@@ -2,9 +2,8 @@ import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, dcc, no_update, register_page, callback
 from flask_login import current_user
 
-from utilities.auth import change_password
-from utilities.config import get_session
-from models.user import User
+from utils.config import get_session
+from utils.user import change_password, User
 
 register_page(__name__, path="/profile")
 
