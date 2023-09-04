@@ -20,7 +20,12 @@ header = dbc.Navbar(
                 [
                     dbc.NavItem(dbc.NavLink("Home", href=config["HOME_PATH"])),
                     dbc.NavItem(dbc.NavLink("Page", href="/page")),
-                    dbc.NavItem(dbc.NavLink(id="user-name-nav", href="/profile")),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            html.Span(id="user-name-nav"),
+                            href="/profile",
+                        )
+                    ),
                     dbc.NavItem(dbc.NavLink("Login", id="user-action", href="/login")),
                 ],
             ),
@@ -53,7 +58,10 @@ def profile_link(_, __):
     Returns a navbar link to the user profile if the user is authenticated
     """
     if current_user.is_authenticated:
-        return html.Div(current_user.first)
+        return [
+            html.I(className="bi bi-person-circle", style=dict(marginRight="5px")),
+            current_user.first,
+        ]
     else:
         return ""
 
