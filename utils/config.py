@@ -4,7 +4,7 @@ from flask import current_app
 from dotenv import dotenv_values
 
 # Load a config dictionary from the dotenv file.
-config = dotenv_values(".env.private")
+config = dotenv_values(".env")
 
 
 def make_engine() -> sqlalchemy.engine.Engine:

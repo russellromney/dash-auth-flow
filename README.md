@@ -13,6 +13,14 @@ This has landing pages and functions to run the entire authentication flow:
 
 This uses `flask-login` on the backend, taking some inspiration from the very useful [dash-flask-login](https://github.com/RafaelMiquelino/dash-flask-login). Data is held in `users.db`.
 
+### The `.env` File
+
+The provided `.env.example` is just an example. Copy that file to a `.env` file and fill in the details. It's set up this way so you don't accidentally expose your credentials in git. The app won't run correctly if `.env` doesn't have the required values filled out.
+
+
+
+### Run Locally
+
 ```shell
 # with plain virtualenv
 python -m venv venv

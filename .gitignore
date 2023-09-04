@@ -56,4 +56,4 @@ ehthumbs.db
 Thumbs.db
 
 # python 
-.env.private
+.env
