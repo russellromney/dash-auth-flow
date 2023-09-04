@@ -22,7 +22,6 @@ def layout():
     return dbc.Row(
         dbc.Col(
             [
-                html.Div(1, id="profile-trigger", style=dict(display="none")),
                 html.H3("Profile", id="profile-title"),
                 html.Div(id="profile-alert"),
                 html.Div(id="profile-alert-login"),
@@ -104,6 +103,7 @@ def layout():
     Output("profile-first-input", "value"),
     Output("profile-last-input", "value"),
     Input("profile-trigger", "children"),
+    prevent_initial_call=True,
 )
 def profile_values(trigger):
     """
@@ -142,6 +142,7 @@ def profile_values(trigger):
     Input("profile-last-input", "value"),
     Input("profile-password-input", "value"),
     Input("profile-password-confirm", "value"),
+    prevent_initial_call=True,
 )
 def profile_validate(first, last, password, confirm):
     disabled = True
@@ -225,6 +226,9 @@ def profile_save_changes(n_clicks, first, last, password):
     if password is blank, pull the current password and submit it
     assumes all inputs are valid and checked by validator callback before submitting (enforced by disabling button otherwise)
     """
+    if not n_clicks:
+        return no_update, no_update
+
     email = current_user.email
 
     user = User.from_email(email)

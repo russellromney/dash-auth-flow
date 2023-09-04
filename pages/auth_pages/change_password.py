@@ -20,6 +20,7 @@ failure_alert = dbc.Alert(
     color="danger",
 )
 
+
 @unprotected
 @redirect_authenticated("/home")
 def layout():
@@ -31,18 +32,19 @@ def layout():
                     dbc.Col(
                         [
                             html.Div(id="change-alert"),
+                            html.Div(id="change-redirect"),
                             html.Br(),
-                            dbc.Input(id="change-email", autoFocus=True),
                             dbc.FormText("Email"),
+                            dbc.Input(id="change-email", autoFocus=True),
                             html.Br(),
-                            dbc.Input(id="change-key", type="password"),
                             dbc.FormText("Code"),
+                            dbc.Input(id="change-key", type="password"),
                             html.Br(),
-                            dbc.Input(id="change-password", type="password"),
                             dbc.FormText("New password"),
+                            dbc.Input(id="change-password", type="password"),
                             html.Br(),
-                            dbc.Input(id="change-confirm", type="password"),
                             dbc.FormText("Confirm new password"),
+                            dbc.Input(id="change-confirm", type="password"),
                             html.Br(),
                             dbc.Button(
                                 "Submit password change",
@@ -67,6 +69,7 @@ def layout():
     Output("change-button", "disabled"),
     Input("change-password", "value"),
     Input("change-confirm", "value"),
+    prevent_initial_call=True,
 )
 def change_validate_inputs(password, confirm):
     password_valid = False
@@ -97,19 +100,20 @@ def change_validate_inputs(password, confirm):
 
 @callback(
     Output("change-alert", "children"),
-    Output("change-url", "pathname"),
+    Output("change-redirect", "pathname"),
     Input("change-button", "n_clicks"),
     State("change-email", "value"),
     State("change-key", "value"),
     State("change-password", "value"),
     State("change-confirm", "value"),
+    prevent_initial_call=True,
 )
 def submit_change(submit, email, key, password, confirm):
     # all inputs have been previously validated
     if validate_password_key(email, key):
         # if that returns true, update the user information
         if change_password(email, password):
-            return success_alert, "/login"
+            return success_alert, dcc.Location(id="redirect-change-to-forgot")
         else:
             pass
     else:

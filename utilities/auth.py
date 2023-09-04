@@ -118,7 +118,7 @@ def send_password_key(email, firstname):
         data = {
             "Messages": [
                 {
-                    "From": {"Email": config.get('FROM_EMAIL'), "Name": "My App"},
+                    "From": {"Email": config.get("FROM_EMAIL"), "Name": "My App"},
                     "To": [
                         {
                             "Email": email,

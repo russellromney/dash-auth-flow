@@ -8,13 +8,14 @@ from utilities.auth import redirect_authenticated, unprotected
 
 register_page(__name__, path="/login")
 
+
 @unprotected
-@redirect_authenticated
+@redirect_authenticated("/home")
 def layout():
     return dbc.Row(
         dbc.Col(
             [
-                html.Div(id="login-url"),
+                html.Div(id="login-redirect"),
                 dbc.Row(
                     dbc.Col(
                         [
@@ -24,13 +25,13 @@ def layout():
                                 dismissable=True,
                             ),
                             html.Br(),
-                            dbc.Input(id="login-email", autoFocus=True),
                             dbc.FormText("Email"),
+                            dbc.Input(id="login-email", autoFocus=True),
                             html.Br(),
+                            dbc.FormText("Password"),
                             dbc.Input(
                                 id="login-password", type="password", debounce=True
                             ),
-                            dbc.FormText("Password"),
                             html.Br(),
                             dbc.Button(
                                 "Submit", color="primary", id="login-button", n_clicks=0
@@ -51,10 +52,11 @@ def layout():
 
 
 @callback(
-    Output("login-url", "children"),
+    Output("login-redirect", "children"),
     Input("login-button", "n_clicks"),
     Input("login-password", "value"),
     State("login-email", "value"),
+    prevent_initial_call=True,
 )
 def login_success(n_clicks, password, email):
     """

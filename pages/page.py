@@ -5,7 +5,6 @@ import time
 register_page(__name__, path="/page")
 
 
-
 def layout():
     # if current_user.is_authenticated:
     return dbc.Row(
@@ -34,7 +33,7 @@ def layout():
 
 
 @callback(Output("page-test", "src"), Input("page-test-trigger", "children"))
-def page_test_update(trigger):
+def page_div_update(trigger):
     """
     updates iframe with example.com
     """

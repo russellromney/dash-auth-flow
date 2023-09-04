@@ -7,7 +7,7 @@ import sqlalchemy
 
 # local imports
 from models.user import User
-from utilities.auth import protect_views
+from utilities.auth import protect_layouts
 from utilities.config import get_session, make_engine
 
 
@@ -49,4 +49,4 @@ def create_app():
 
 
 app, server = create_app()
-protect_views(default=True)
+protect_layouts(default=True)

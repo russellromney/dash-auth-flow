@@ -20,6 +20,7 @@ already_registered_alert = dbc.Alert(
     "You're already registered! Taking you home.", color="success", dismissable=True
 )
 
+
 @unprotected
 @redirect_authenticated("/home")
 def layout():
@@ -27,25 +28,26 @@ def layout():
         dbc.Col(
             [
                 html.Div(id="register-alert"),
+                html.Div(id="register-redirect"),
                 dbc.Row(
                     dbc.Col(
                         [
-                            dbc.Input(id="register-first", autoFocus=True),
                             dbc.FormText("First"),
+                            dbc.Input(id="register-first", autoFocus=True),
                             html.Br(),
-                            dbc.Input(id="register-last"),
                             dbc.FormText("Last"),
+                            dbc.Input(id="register-last"),
                             html.Br(),
-                            dbc.Input(id="register-email"),
                             dbc.FormText(
                                 "Email", id="register-email-formtext", color="secondary"
                             ),
+                            dbc.Input(id="register-email"),
                             html.Br(),
-                            dbc.Input(id="register-password", type="password"),
                             dbc.FormText("Password"),
+                            dbc.Input(id="register-password", type="password"),
                             html.Br(),
-                            dbc.Input(id="register-confirm", type="password"),
                             dbc.FormText("Confirm password"),
+                            dbc.Input(id="register-confirm", type="password"),
                             html.Br(),
                             dbc.Button("Submit", color="primary", id="register-button"),
                         ]
@@ -76,6 +78,7 @@ def layout():
     Input("register-email", "value"),
     Input("register-password", "value"),
     Input("register-confirm", "value"),
+    prevent_initial_call=True,
 )
 def register_validate_inputs(first, last, email, password, confirm):
     """
@@ -147,7 +150,7 @@ def register_validate_inputs(first, last, email, password, confirm):
 
 
 @callback(
-    Output("register-url", "pathname"),
+    Output("register-redirect", "children"),
     Output("register-alert", "children"),
     Input("register-button", "n_clicks"),
     State("register-first", "value"),
@@ -155,18 +158,14 @@ def register_validate_inputs(first, last, email, password, confirm):
     State("register-email", "value"),
     State("register-password", "value"),
     State("register-confirm", "value"),
+    prevent_initial_call=True,
 )
 def register_success(n_clicks, first, last, email, password, confirm):
-    if n_clicks in (None, 0):
-        time.sleep(0.25)
-        if current_user.is_authenticated:
-            return "/home", already_registered_alert
-        else:
-            return no_update, no_update
-
-    if not n_clicks:
-        return no_update, no_update
     if add_user(first, last, password, email):
-        return "/login", success_alert
+        return (
+            dcc.Location(id="redirect-register-to-home", pathname="/home"),
+            # success_alert,
+            "",
+        )
     else:
         return "", failure_alert

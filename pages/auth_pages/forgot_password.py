@@ -16,6 +16,7 @@ failure_alert = dbc.Alert(
     color="danger",
 )
 
+
 @unprotected
 @redirect_authenticated("/home")
 def layout():
@@ -23,13 +24,14 @@ def layout():
         dbc.Col(
             [
                 html.H3("Forgot Password"),
+                html.Div(id="forgot-redirect"),
                 dbc.Row(
                     dbc.Col(
                         [
                             html.Div(id="forgot-alert"),
                             html.Br(),
-                            dbc.Input(id="forgot-email", autoFocus=True),
                             dbc.FormText("Email"),
+                            dbc.Input(id="forgot-email", autoFocus=True),
                             html.Br(),
                             dbc.Button(
                                 "Submit email to receive code",
@@ -47,11 +49,12 @@ def layout():
 
 @callback(
     Output("forgot-alert", "children"),
-    Output("forgot-url", "pathname"),
+    Output("forgot-redirect", "children"),
     Input("forgot-button", "n_clicks"),
     State("forgot-email", "value"),
+    prevent_initial_call=True,
 )
-def forgot_submit(submit, email):
+def forgot_submit(_, email):
     # get first name
     user = User.from_email(email)
     if not user:
@@ -59,6 +62,8 @@ def forgot_submit(submit, email):
 
     # if it does, send password reset and save info
     if send_password_key(email, user.first):
-        return success_alert, "/change"
+        return success_alert, dcc.Location(
+            id="redirect-forgot-to-change", pathname="/change"
+        )
     else:
         return failure_alert, no_update

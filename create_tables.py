@@ -11,9 +11,9 @@ from utilities.user import add_user, show_users
 
 def main():
     """
-    Create all the tables in the current SQLModel metadata. 
+    Create all the tables in the current SQLModel metadata.
 
-    Clear the tables. 
+    Clear the tables.
     Re-create the test values.
     """
     # engine is open to sqlite///users.db (or whatever is in the .env files)

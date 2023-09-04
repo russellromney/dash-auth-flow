@@ -23,7 +23,6 @@ def show_users():
         logger.info(row.dict())
 
 
-
 def change_password(email: str, password: str) -> bool:
     """
     Change user password. Just changes the password;

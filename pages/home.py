@@ -31,7 +31,7 @@ def layout():
 
 
 @callback(Output("home-test", "children"), Input("home-test-trigger", "children"))
-def home_test_update(trigger):
+def home_div_update(trigger):
     """
     updates arbitrary value on home page for test
     """

@@ -53,3 +53,6 @@ push_to_server
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# python 
+.env
