@@ -2,7 +2,7 @@ from logzero import logger
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, dcc, register_page, callback
 import dash
-from server import app
+from application import app
 from flask_login import current_user
 
 register_page(__name__, path="/")

@@ -4,7 +4,7 @@ from flask import current_app
 from sqlmodel import SQLModel, select
 from models.user import User
 
-from server import server
+from application import server
 from utilities.config import get_session
 from utilities.user import add_user, show_users
 

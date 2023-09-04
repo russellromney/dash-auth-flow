@@ -1,2 +1,6 @@
 fly.toml
-.env
+venv
+.git
+example.gif
+users.db
+# ... whatever else you want
