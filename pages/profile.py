@@ -2,7 +2,7 @@ import time
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, dcc, no_update, register_page, callback
 from flask_login import current_user
-from utils.config import get_session
+from utils.config import get_session, config
 from utils.user import change_password, User
 
 register_page(__name__, path="/profile")
@@ -82,10 +82,16 @@ def layout():
 
 
 success_alert = dbc.Alert(
-    "Changes saved successfully.", color="success", dismissable=True, duration=3000
+    "Changes saved successfully.",
+    color="success",
+    dismissable=True,
+    duration=config["ALERT_DELAY"],
 )
 failure_alert = dbc.Alert(
-    "Unable to save changes.", color="danger", dismissable=True, duration=3000
+    "Unable to save changes.",
+    color="danger",
+    dismissable=True,
+    duration=config["ALERT_DELAY"],
 )
 
 

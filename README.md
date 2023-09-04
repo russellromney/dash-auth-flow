@@ -26,15 +26,19 @@ The provided `.env.example` is just an example. Copy that file to a `.env` file 
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-python create_tables.py # test@test.com / test
+python create_tables.py
 python app.py
 
 # with pipenv
 pip install pipenv
 pipenv install --ignore-pipfile
-pipenv shell
-python create_tables.py # test@test.com / test
-python app.py
+pipenv python create_tables.py
+pipenv run python app.py
+
+# with poetry
+pip install poetry
+poetry run python create_tables.py
+poetry run python app.py
 
 # either: deactivate virtual environment
 deactivate

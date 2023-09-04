@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Self, Union
+from typing import Union
 from flask_login import UserMixin
 from sqlmodel import SQLModel, Field, select
 import sqlalchemy

@@ -1,22 +1,27 @@
 [tool.poetry]
 name = "dash-auth-flow"
-version = "0.1.0"
-description = ""
-authors = ["Russell Romney <russellromney@gmail.com>"]
+version = "0.2.0"
+description = "Batteries-included authentication flow with Dash"
+authors = ["Your Name <you@example.com>"]
 license = "MIT"
+readme = "README.md"
+packages = [{include = "dash_auth_flow"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-dash = "^2.8.1"
-dash-bootstrap-components = "^1.3.1"
-Flask-Login = "^0.6.2"
-Flask-SQLAlchemy = "^3.0.3"
-shortuuid = "^1.0.11"
-requests = "^2.31.0"
+python = "^3.9"
+dash = "^2.13.0"
+black = "^23.7.0"
+flask-login = "^0.6.2"
+logzero = "^1.7.0"
 mailjet-rest = "^1.3.4"
+gunicorn = "^21.2.0"
+sqlmodel = "^0.0.8"
+flask-sqlalchemy = "^3.0.5"
+validate-email = "^1.3"
+dash-bootstrap-components = "^1.4.2"
+python-dotenv = "^1.0.0"
 
-[tool.poetry.dev-dependencies]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

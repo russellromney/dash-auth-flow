@@ -67,7 +67,7 @@ failure_alert = dbc.Alert(
     "Login failed. Check your email and password.",
     color="danger",
     dismissable=True,
-    duration=3000,
+    duration=config["ALERT_DELAY"],
 )
 
 
@@ -100,6 +100,6 @@ def login_success(n_clicks, password, email):
 )
 def login_redirect(trigger):
     if trigger:
-        time.sleep(2)
+        time.sleep(config["TRANSITION_DELAY"])
         return "", config["HOME_PATH"]
     return no_update, no_update

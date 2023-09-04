@@ -67,7 +67,7 @@ failure_alert = dbc.Alert(
     "Registration unsuccessful. Try again.",
     color="danger",
     dismissable=True,
-    duration=3000,
+    duration=config["ALERT_DELAY"],
 )
 
 
@@ -191,6 +191,6 @@ def register_success(n_clicks, first, last, email, password, confirm):
 def register_redirect(trigger):
     if trigger:
         if trigger == 1:
-            time.sleep(1.5)
+            time.sleep(config["TRANSITION_DELAY"])
             return "/login", ""
     return no_update, no_update

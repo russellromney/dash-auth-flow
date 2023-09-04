@@ -5,6 +5,7 @@ from dotenv import dotenv_values
 
 # Load a config dictionary from the dotenv file.
 config = dotenv_values(".env")
+config["TRANSITION_DELAY"] = float(config["TRANSITION_DELAY"])
 
 
 def make_engine() -> sqlalchemy.engine.Engine:

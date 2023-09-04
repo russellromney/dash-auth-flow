@@ -67,7 +67,7 @@ failure_alert = dbc.Alert(
     "Reset unsuccessful. Are you sure the email and code were correct?",
     color="danger",
     dismissable=True,
-    duration=3000,
+    duration=config["ALERT_DELAY"],
 )
 
 
@@ -140,6 +140,6 @@ def submit_change(submit, email, key, password, confirm):
 )
 def change_redirect(trigger):
     if trigger:
-        time.sleep(2)
+        time.sleep(config["TRANSITION_DELAY"])
         return "/forgot", ""
     return no_update, no_update
