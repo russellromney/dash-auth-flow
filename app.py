@@ -1,19 +1,19 @@
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, dcc, register_page, callback
 import dash
-from application import app
+from application import app, server
 from flask_login import current_user
 
 
 header = dbc.Navbar(
     dbc.Container(
         [
-            dbc.NavbarBrand("Dash Auth Flow", href="/home"),
+            dbc.NavbarBrand("Dash Auth Flow", href="/"),
             dbc.Nav(
                 [
-                    dbc.NavItem(dbc.NavLink("Home", href="/home")),
+                    dbc.NavItem(dbc.NavLink("Home", href="/")),
                     dbc.NavItem(dbc.NavLink("Page", href="/page")),
-                    dbc.NavItem(dbc.NavLink(id="user-name", href="/profile")),
+                    dbc.NavItem(dbc.NavLink(id="user-name-nav", href="/profile")),
                     dbc.NavItem(dbc.NavLink("Login", id="user-action", href="/login")),
                 ]
             ),
@@ -28,13 +28,13 @@ app.layout = html.Div(
         header,
         dbc.Container(dash.page_container),
         dcc.Location(id="url", refresh=True),
-        html.Div(1, id="profile-trigger", style=dict(display="none")),
+        html.Div(id="profile-trigger", style=dict(display="none")),
     ]
 )
 
 
 @callback(
-    Output("user-name", "children"),
+    Output("user-name-nav", "children"),
     Input("url", "pathname"),
     Input("profile-trigger", "children"),
 )
@@ -57,7 +57,6 @@ def user_logout(_):
     """
     returns a navbar link to /logout or /login, respectively, if the user is authenticated or not
     """
-
     if current_user.is_authenticated:
         out = "Logout", "/logout"
     else:

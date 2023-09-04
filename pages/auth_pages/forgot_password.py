@@ -1,6 +1,7 @@
+import time
+import uuid
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, dcc, no_update, callback, register_page
-from flask_login import current_user
 from models.user import User
 
 from utilities.auth import redirect_authenticated, send_password_key, unprotected
@@ -14,17 +15,18 @@ success_alert = dbc.Alert(
 failure_alert = dbc.Alert(
     "Reset unsuccessful. Are you sure that email was correct?",
     color="danger",
+    dismissable=True,
+    duration=3000,
 )
 
 
 @unprotected
-@redirect_authenticated("/home")
+@redirect_authenticated("/")
 def layout():
     return dbc.Row(
         dbc.Col(
             [
                 html.H3("Forgot Password"),
-                html.Div(id="forgot-redirect"),
                 dbc.Row(
                     dbc.Col(
                         [
@@ -33,6 +35,15 @@ def layout():
                             dbc.FormText("Email"),
                             dbc.Input(id="forgot-email", autoFocus=True),
                             html.Br(),
+                            dcc.Loading(
+                                [
+                                    html.Div(
+                                        id="forgot-trigger", style=dict(display="none")
+                                    ),
+                                    html.Div(id="forgot-redirect"),
+                                ],
+                                id=uuid.uuid4().hex,
+                            ),
                             dbc.Button(
                                 "Submit email to receive code",
                                 id="forgot-button",
@@ -42,14 +53,14 @@ def layout():
                     )
                 ),
             ],
-            width=6,
+            className="auth-page",
         )
     )
 
 
 @callback(
     Output("forgot-alert", "children"),
-    Output("forgot-redirect", "children"),
+    Output("forgot-trigger", "children"),
     Input("forgot-button", "n_clicks"),
     State("forgot-email", "value"),
     prevent_initial_call=True,
@@ -62,8 +73,18 @@ def forgot_submit(_, email):
 
     # if it does, send password reset and save info
     if send_password_key(email, user.first):
-        return success_alert, dcc.Location(
-            id="redirect-forgot-to-change", pathname="/change"
-        )
+        return success_alert, 1
     else:
         return failure_alert, no_update
+
+
+@callback(
+    Output("forgot-redirect", "children"),
+    Input("forgot-trigger", "children"),
+    prevent_initial_call=True,
+)
+def forgot_redirect(trigger):
+    if trigger:
+        time.sleep(2)
+        return dcc.Location(id="redirect-forgot-to-change", pathname="/change")
+    return no_update

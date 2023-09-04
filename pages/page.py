@@ -6,7 +6,6 @@ register_page(__name__, path="/page")
 
 
 def layout():
-    # if current_user.is_authenticated:
     return dbc.Row(
         dbc.Col(
             [
@@ -23,17 +22,16 @@ def layout():
                         id="page-test", style=dict(height="500px", width="100%")
                     ),
                     id="page-loading",
-                    type="circle",
                     style=dict(width="100%"),
                 ),
             ],
-            width=10,
+            className="page-content",
         )
     )
 
 
 @callback(Output("page-test", "src"), Input("page-test-trigger", "children"))
-def page_div_update(trigger):
+def page_div_update(_):
     """
     updates iframe with example.com
     """

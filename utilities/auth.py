@@ -105,11 +105,8 @@ def send_password_key(email, firstname):
     if not user:
         return False
 
-    # generate password key
+    # generate a random key and send it to the user's email
     key = "".join([random.choice("1234567890") for x in range(6)])
-
-    # send password key via email
-    first = user.first
     try:
         mailjet = Client(
             auth=(config.get("MAILJET_API_KEY"), config.get("MAILJET_API_SECRET")),
@@ -122,21 +119,21 @@ def send_password_key(email, firstname):
                     "To": [
                         {
                             "Email": email,
-                            "Name": first,
+                            "Name": user.first,
                         }
                     ],
-                    "Subject": "Greetings from Mailjet.",
+                    "Subject": "Greetings from Dash-Auth-Flow.",
                     "TextPart": "My App password reset code",
-                    "HTMLPart": "<p>Dear {},<p> <p>Your My App password reset code is: <strong>{}</strong>".format(
-                        firstname, key
-                    ),
+                    "HTMLPart": f"<p>Dear {user.first},<p> <p>Your My App password reset code is: <strong>{key}</strong>",
                     "CustomID": "AppGettingStartedTest",
                 }
             ]
         }
         result = mailjet.send.create(data=data)
-        if result.status_code != "200":
-            logger.info("status not 200")
+        if result.status_code != 200:
+            logger.info(f"Mailjet returned a non-200 status: {result.status_code}")
+            logger.info(result.json())
+            return False
     except Exception as e:
         traceback.print_exc(e)
         return False
@@ -153,7 +150,6 @@ def send_password_key(email, firstname):
     random_password = "".join([random.choice("1234567890") for x in range(15)])
     res = change_password(email, random_password)
     if res:
-        # finished successfully
         return True
     return False
 

@@ -1,3 +1,4 @@
+import uuid
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, dcc, no_update, register_page, callback
 from flask_login import current_user
@@ -11,24 +12,23 @@ from utilities.user import add_user
 register_page(__name__, path="/register")
 
 success_alert = dbc.Alert(
-    "Registered successfully. Taking you to login.", color="success", dismissable=True
+    "Registered successfully. Taking you to login.", color="success"
 )
 failure_alert = dbc.Alert(
-    "Registration unsuccessful.", color="danger", dismissable=True
-)
-already_registered_alert = dbc.Alert(
-    "You're already registered! Taking you home.", color="success", dismissable=True
+    "Registration unsuccessful. Try again.",
+    color="danger",
+    dismissable=True,
+    duration=3000,
 )
 
 
 @unprotected
-@redirect_authenticated("/home")
+@redirect_authenticated("/")
 def layout():
     return dbc.Row(
         dbc.Col(
             [
                 html.Div(id="register-alert"),
-                html.Div(id="register-redirect"),
                 dbc.Row(
                     dbc.Col(
                         [
@@ -50,11 +50,21 @@ def layout():
                             dbc.Input(id="register-confirm", type="password"),
                             html.Br(),
                             dbc.Button("Submit", color="primary", id="register-button"),
+                            dcc.Loading(
+                                [
+                                    html.Div(
+                                        id="register-trigger",
+                                        style=dict(display="none"),
+                                    ),
+                                    html.Div(id="register-redirect"),
+                                ],
+                                id=uuid.uuid4().hex,
+                            ),
                         ]
                     ),
                 ),
             ],
-            width=6,
+            className="auth-page",
         )
     )
 
@@ -134,7 +144,7 @@ def register_validate_inputs(first, last, email, password, confirm):
         d["valid"][x] = False
         d["invalid"][x] = True
         email_formcolor = "danger"
-        email_formtext = "Email already exists."
+        email_formtext = "Email is already registered."
 
     # if all are valid, enable the button
     if sum(d["valid"].values()) == 5:
@@ -150,8 +160,8 @@ def register_validate_inputs(first, last, email, password, confirm):
 
 
 @callback(
-    Output("register-redirect", "children"),
     Output("register-alert", "children"),
+    Output("register-trigger", "children"),
     Input("register-button", "n_clicks"),
     State("register-first", "value"),
     State("register-last", "value"),
@@ -163,9 +173,21 @@ def register_validate_inputs(first, last, email, password, confirm):
 def register_success(n_clicks, first, last, email, password, confirm):
     if add_user(first, last, password, email):
         return (
-            dcc.Location(id="redirect-register-to-home", pathname="/home"),
-            # success_alert,
-            "",
+            success_alert,
+            1,
         )
     else:
-        return "", failure_alert
+        return failure_alert, no_update
+
+
+@callback(
+    Output("register-redirect", "children"),
+    Input("register-trigger", "children"),
+    prevent_initial_call=True,
+)
+def register_redirect(trigger):
+    if trigger:
+        if trigger == 1:
+            time.sleep(1.5)
+            return dcc.Location(id="redirect-register-to-home", pathname="/")
+    return no_update

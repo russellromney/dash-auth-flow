@@ -1,3 +1,5 @@
+import time
+import uuid
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, dcc, no_update, register_page, callback
 from flask_login import current_user, login_user
@@ -8,17 +10,25 @@ from utilities.auth import redirect_authenticated, unprotected
 
 register_page(__name__, path="/login")
 
+success_alert = dbc.Alert("Logged in. Taking you to home.", color="success")
+failure_alert = dbc.Alert(
+    "Login failed. Check your email and password.",
+    color="danger",
+    dismissable=True,
+    duration=3000,
+)
+
 
 @unprotected
-@redirect_authenticated("/home")
+@redirect_authenticated("/")
 def layout():
     return dbc.Row(
         dbc.Col(
             [
-                html.Div(id="login-redirect"),
                 dbc.Row(
                     dbc.Col(
                         [
+                            html.Div(id="login-alert"),
                             dbc.Alert(
                                 "Try test@test.com / test",
                                 color="info",
@@ -36,7 +46,15 @@ def layout():
                             dbc.Button(
                                 "Submit", color="primary", id="login-button", n_clicks=0
                             ),
-                            # dbc.FormText(id='output-state')
+                            dcc.Loading(
+                                [
+                                    html.Div(
+                                        id="login-trigger", style=dict(display="none")
+                                    ),
+                                    html.Div(id="login-redirect"),
+                                ],
+                                id=uuid.uuid4().hex,
+                            ),
                             html.Br(),
                             html.Br(),
                             dcc.Link("Register", href="/register"),
@@ -46,28 +64,41 @@ def layout():
                     )
                 ),
             ],
-            width=6,
+            className="auth-page",
         )
     )
 
 
 @callback(
-    Output("login-redirect", "children"),
+    Output("login-trigger", "children"),
+    Output("login-alert", "children"),
     Input("login-button", "n_clicks"),
     Input("login-password", "value"),
     State("login-email", "value"),
     prevent_initial_call=True,
 )
 def login_success(n_clicks, password, email):
-    """
-    logs in the user
-    """
-    if password is not None or n_clicks > 0:
+    if not n_clicks:
+        return no_update
+    if password is not None:
         user = User.from_email(email)
         if user:
             if check_password_hash(user.password, password):
                 login_user(user)
-                return dcc.Location(id="redirect-login-to-home", pathname="/home")
-        return no_update
-    else:
-        return no_update
+                return 1, success_alert
+        return no_update, failure_alert
+    return no_update
+
+
+@callback(
+    Output("login-redirect", "children"),
+    Output("url", "pathname", allow_duplicate=True),
+    Input("login-trigger", "children"),
+    prevent_initial_call=True,
+)
+def login_redirect(trigger):
+    if trigger:
+        time.sleep(2)
+        return "", "/"
+        return dcc.Location(id="redirect-login-to-home", pathname="/")
+    return no_update

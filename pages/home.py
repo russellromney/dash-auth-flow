@@ -3,7 +3,7 @@ from dash import Output, Input, State, dcc, html, no_update, register_page, call
 import time
 
 
-register_page(__name__, path="/home")
+register_page(__name__, path="/")
 
 
 def layout():
@@ -21,19 +21,16 @@ def layout():
                 dcc.Loading(
                     html.Div("before update", id="home-test"),
                     id="loading-home-test-trigger",
-                    type="circle",
                     style=dict(width="100%"),
                 ),
             ],
-            width=10,
-        )
+            className="page-content",
+        ),
     )
 
 
 @callback(Output("home-test", "children"), Input("home-test-trigger", "children"))
-def home_div_update(trigger):
-    """
-    updates arbitrary value on home page for test
-    """
+def home_div_update(_):
+    """Updates arbitrary value on home page as example of callback."""
     time.sleep(1)
     return html.Div("after the update", style=dict(color="red"))
