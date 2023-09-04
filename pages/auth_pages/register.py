@@ -12,16 +12,6 @@ from utils.config import config
 
 register_page(__name__, path="/register")
 
-success_alert = dbc.Alert(
-    "Registered successfully. Taking you to login.", color="success"
-)
-failure_alert = dbc.Alert(
-    "Registration unsuccessful. Try again.",
-    color="danger",
-    dismissable=True,
-    duration=3000,
-)
-
 
 @unprotected
 @redirect_authenticated(config["HOME_PATH"])
@@ -68,6 +58,17 @@ def layout():
             className="auth-page",
         )
     )
+
+
+success_alert = dbc.Alert(
+    "Registered successfully. Taking you to login.", color="success"
+)
+failure_alert = dbc.Alert(
+    "Registration unsuccessful. Try again.",
+    color="danger",
+    dismissable=True,
+    duration=3000,
+)
 
 
 @callback(

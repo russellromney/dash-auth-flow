@@ -1,18 +1,11 @@
+import time
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, dcc, no_update, register_page, callback
 from flask_login import current_user
-
 from utils.config import get_session
 from utils.user import change_password, User
 
 register_page(__name__, path="/profile")
-
-success_alert = dbc.Alert(
-    "Changes saved successfully.", color="success", dismissable=True, duration=3000
-)
-failure_alert = dbc.Alert(
-    "Unable to save changes.", color="danger", dismissable=True, duration=3000
-)
 
 
 def layout():
@@ -23,6 +16,10 @@ def layout():
                 html.Div(id="profile-alert"),
                 html.Div(id="profile-alert-login"),
                 html.Div(id="profile-login-trigger", style=dict(display="none")),
+                dcc.Loading(
+                    html.Div(id="loading-profile-trigger"),
+                    id="loading-profile",
+                ),
                 html.Br(),
                 dbc.Row(
                     dbc.Col(
@@ -84,7 +81,16 @@ def layout():
     )
 
 
+success_alert = dbc.Alert(
+    "Changes saved successfully.", color="success", dismissable=True, duration=3000
+)
+failure_alert = dbc.Alert(
+    "Unable to save changes.", color="danger", dismissable=True, duration=3000
+)
+
+
 @callback(
+    Output("loading-profile-trigger", "children"),
     Output("profile-first", "children"),
     Output("profile-last", "children"),
     Output("profile-email", "children"),
@@ -98,14 +104,16 @@ def profile_values(_, __):
     Loads values for user from database.
     """
     if current_user.is_authenticated:
+        time.sleep(1)
         return (
+            "",
             ["First: ", html.Strong(current_user.first)],
             ["Last: ", html.Strong(current_user.last)],
             ["Email: ", html.Strong(current_user.email)],
             current_user.first,
             current_user.last,
         )
-    return "First: ", "Last: ", "Email:", "", ""
+    return "", "First: ", "Last: ", "Email:", "", "", ""
 
 
 # function to validate changes input

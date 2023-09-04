@@ -10,17 +10,6 @@ from utils.config import config
 
 register_page(__name__, path="/forgot")
 
-success_alert = dbc.Alert(
-    "Reset successful. Taking you to change password.",
-    color="success",
-)
-failure_alert = dbc.Alert(
-    "Reset unsuccessful. Are you sure that email was correct?",
-    color="danger",
-    dismissable=True,
-    duration=3000,
-)
-
 
 @unprotected
 @redirect_authenticated(config["HOME_PATH"])
@@ -58,6 +47,18 @@ def layout():
             className="auth-page",
         )
     )
+
+
+success_alert = dbc.Alert(
+    "Reset successful. Taking you to change password.",
+    color="success",
+)
+failure_alert = dbc.Alert(
+    "Reset unsuccessful. Are you sure that email was correct?",
+    color="danger",
+    dismissable=True,
+    duration=3000,
+)
 
 
 @callback(
