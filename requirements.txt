@@ -36,6 +36,6 @@ sqlalchemy2-stubs==0.0.2a35
 sqlmodel==0.0.8
 tenacity==8.2.3
 typing_extensions==4.7.1
-urllib3==2.0.4
+urllib3==2.0.6
 validate-email==1.3
 Werkzeug==2.2.3
