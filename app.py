@@ -1,9 +1,11 @@
 import dash_bootstrap_components as dbc
-from dash import Input, Output, State, html, dcc, register_page, callback
+from dash import Input, Output, State, html, dcc, callback
 import dash
 from application import app, server
 from flask_login import current_user
 from utils.config import config
+from utils.auth import protect_app, unprotected
+
 
 header = dbc.Navbar(
     dbc.Container(
@@ -18,6 +20,7 @@ header = dbc.Navbar(
             ),
             dbc.Nav(
                 [
+                    dbc.NavItem(dbc.NavLink("Public", href="/public")),
                     dbc.NavItem(dbc.NavLink("Home", href=config["HOME_PATH"])),
                     dbc.NavItem(dbc.NavLink("Page", href="/page")),
                     dbc.NavItem(
@@ -53,6 +56,7 @@ app.layout = html.Div(
     Input("url", "pathname"),
     Input("profile-trigger", "children"),
 )
+@unprotected
 def profile_link(_, __):
     """
     Returns a navbar link to the user profile if the user is authenticated
@@ -71,7 +75,8 @@ def profile_link(_, __):
     Output("user-action", "href"),
     Input("url", "pathname"),
 )
-def user_logout(_):
+@unprotected
+def user_logout_or_login(_):
     """
     returns a navbar link to /logout or /login, respectively, if the user is authenticated or not
     """
@@ -82,5 +87,6 @@ def user_logout(_):
     return out
 
 
+protect_app(default=True)
 if __name__ == "__main__":
     app.run_server(debug=True)

@@ -51,4 +51,4 @@ def create_app():
 
 
 app, server = create_app()
-protect_layouts(default=True)
+

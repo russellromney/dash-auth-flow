@@ -70,7 +70,6 @@ failure_alert = dbc.Alert(
     duration=config["ALERT_DELAY"],
 )
 
-
 @callback(
     Output("login-trigger", "children"),
     Output("login-alert", "children"),
@@ -79,6 +78,7 @@ failure_alert = dbc.Alert(
     State("login-email", "value"),
     prevent_initial_call=True,
 )
+@unprotected
 def login_success(n_clicks, password, email):
     if not n_clicks:
         return no_update
@@ -98,6 +98,7 @@ def login_success(n_clicks, password, email):
     Input("login-trigger", "children"),
     prevent_initial_call=True,
 )
+@unprotected
 def login_redirect(trigger):
     if trigger:
         time.sleep(config["TRANSITION_DELAY"])
